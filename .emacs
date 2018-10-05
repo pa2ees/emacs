@@ -63,3 +63,4 @@
 ;; magit
 (global-set-key (kbd "C-x g") 'magit-status)
 (setenv "GIT_ASKPASS" "git-gui--askpass")
+(setenv "SSH_ASKPASS" "git-gui--askpass")
