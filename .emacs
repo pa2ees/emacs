@@ -25,7 +25,9 @@
 (setq c-default-style "linux")
 (setq-default c-basic-offset 4)
 
-(setq scroll-step 1)
+;; (setq scroll-step 1)
+(setq scroll-margin 4) ;; sets how far away from top or bottom we start to scroll
+(setq scroll-conservatively 1) ;; seems to work ok
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 
