@@ -35,8 +35,16 @@
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
 
-(load-theme 'abyss t)
+;; (load-theme 'abyss t t)
+;; (enable-theme 'abyss)
+(load-theme 'manoj-dark t)
+(enable-theme 'manoj-dark)
+;; (set-background-color "black")
+;; (let ((frame-background-mode 'light)) (frame-set-background-mode nil))
+
+
 (global-linum-mode)
+(setq linum-format "%d ")
 
 (setq-default indent-tabs-mode nil)
 (setq default-tab-width 4)
@@ -79,3 +87,21 @@
 (setenv "GIT_ASKPASS" "git-gui--askpass")
 (setenv "SSH_ASKPASS" "git-gui--askpass")
 
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("d8dc153c58354d612b2576fea87fe676a3a5d43bcc71170c62ddde4a1ad9e1fb" default)))
+ '(inhibit-startup-screen t)
+ '(package-selected-packages
+   (quote
+    (smartparens magit highlight-parentheses abyss-theme))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
