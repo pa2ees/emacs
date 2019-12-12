@@ -49,9 +49,9 @@
 (setq-default indent-tabs-mode nil)
 (setq default-tab-width 4)
 
-(require 'smartparens-config)
-(smartparens-global-mode 1)
-(show-smartparens-global-mode -1)
+;; (require 'smartparens-config)
+;; (smartparens-global-mode 1)
+;; (show-smartparens-global-mode -1)
 
 (global-highlight-parentheses-mode)
 
@@ -87,6 +87,55 @@
 (setenv "GIT_ASKPASS" "git-gui--askpass")
 (setenv "SSH_ASKPASS" "git-gui--askpass")
 
+;; jedi - python completion
+(add-hook 'python-mode-hook 'jedi:setup)
+(setq jedi:complete-on-dot t)
+
+
+;; ibuffer - an enhanced buffer switching tool
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+
+(setq ibuffer-saved-filter-groups
+      (quote (("default"
+               ("dired" (mode . dired-mode))
+               ("perl" (mode . cperl-mode))
+               ("python" (mode . python-mode))
+               ("verilog" (mode . verilog-mode))
+               ("erc" (mode . erc-mode))
+               ("planner" (or
+                           (name . "^\\*Calendar\\*$")
+                           (name . "^diary$")
+                           (mode . muse-mode)))
+               ("emacs" (or
+                         (name . "^\\*scratch\\*$")
+                         (name . "^\\*Messages\\*$")))
+               ("magit" (or
+                         (name . "^magit*")))
+               ("gnus" (or
+                        (mode . message-mode)
+                        (mode . bbdb-mode)
+                        (mode . mail-mode)
+                        (mode . gnus-group-mode)
+                        (mode . gnus-summary-mode)
+                        (mode . gnus-article-mode)
+                        (name . "^\\.bbdb$")
+                        (name . "^\\.newsrc-dribble")))))))
+
+(setq ibuffer-never-show-predicates (list "^\\*tramp*" "^\\*epc*"))
+(add-hook 'ibuffer-mode-hook
+          (lambda ()
+            (ibuffer-switch-to-saved-filter-groups "default")))
+
+;; Verilog mode disable auto formatting                                   
+
+(eval-after-load 'verilog-mode
+    '(progn
+        ;; same for all the electric-verilog-* commands in                
+        ;; the mode's map (see verilog-mode.el)                      
+        (define-key verilog-mode-map (kbd ";") 'self-insert-command)
+        (define-key verilog-mode-map (kbd ":") 'self-insert-command)
+        (define-key verilog-mode-map (kbd "RET") 'evil-ret)))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -98,10 +147,11 @@
  '(inhibit-startup-screen t)
  '(package-selected-packages
    (quote
-    (smartparens magit highlight-parentheses abyss-theme))))
+    (jedi smartparens magit highlight-parentheses abyss-theme))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
