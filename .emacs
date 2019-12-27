@@ -128,6 +128,9 @@
           (lambda ()
             (ibuffer-switch-to-saved-filter-groups "default")))
 
+(setq ibuffer-show-empty-filter-groups nil)
+
+
 ;; Verilog mode disable auto formatting                                   
 
 (eval-after-load 'verilog-mode
