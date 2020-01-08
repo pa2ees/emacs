@@ -46,6 +46,23 @@
 (global-linum-mode)
 (setq linum-format "%d ")
 
+(add-hook 'doc-view-mode-hook (lambda () (linum-mode -1)))
+
+;; PDF Tools
+(pdf-tools-install)
+
+(add-hook 'pdf-view-mode-hook (lambda () (progn
+                                           (linum-mode -1)
+                                           (local-set-key (kbd "C-p") (lambda () (interactive) (pdf-view-previous-line-or-previous-page 6)))
+                                           (local-set-key (kbd "C-n") (lambda () (interactive) (pdf-view-next-line-or-next-page 6))))))
+
+(setq-default pdf-view-display-size 'fit-page)
+;; (setq-default pdf-view-continuous nil)
+
+
+;; (pdf-view-next-line-or-next-page 6)
+
+
 (setq-default indent-tabs-mode nil)
 (setq default-tab-width 4)
 
@@ -147,7 +164,7 @@
  '(inhibit-startup-screen t)
  '(package-selected-packages
    (quote
-    (jedi smartparens magit highlight-parentheses abyss-theme))))
+    (pdf-tools jedi smartparens magit highlight-parentheses abyss-theme))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
