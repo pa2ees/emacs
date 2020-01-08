@@ -31,6 +31,8 @@
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 
+;; Truncate lines always
+(set-default 'truncate-lines t)
 
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
@@ -142,6 +144,9 @@
 (add-hook 'ibuffer-mode-hook
           (lambda ()
             (ibuffer-switch-to-saved-filter-groups "default")))
+
+(setq ibuffer-show-empty-filter-groups nil)
+
 
 ;; Verilog mode disable auto formatting                                   
 
