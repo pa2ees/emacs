@@ -50,6 +50,33 @@
 
 (add-hook 'doc-view-mode-hook (lambda () (linum-mode -1)))
 
+(add-hook 'dired-mode-hook (lambda () (linum-mode -1)))
+(add-hook 'image-mode-hook (lambda () (linum-mode -1)))
+
+(defun kill-buffer-other-window-and-close()
+  "If there are multiple windows, then close the other window and kill the buffer in it also."
+  (interactive)
+  (let ((local-buff (buffer-name)))
+    (other-window 1)
+    (let ((other-window-buff (buffer-name)))
+      (other-window -1)
+      (if (string= local-buff other-window-buff)
+          (progn
+            (other-window 1)
+            (if (not (one-window-p))
+                (delete-window)))
+        (progn
+          (other-window 1)
+          (kill-this-buffer)
+          (if (not (one-window-p))
+              (delete-window)))))))
+        
+(defun compare-window-buffer-name-with-other-window-buffer-name()
+  (interactive)
+        
+
+(global-set-key (kbd "C-x K") 'kill-buffer-other-window-and-close)
+
 ;; PDF Tools
 (pdf-tools-install)
 
