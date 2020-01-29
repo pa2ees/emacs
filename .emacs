@@ -55,14 +55,16 @@
 (add-hook 'image-mode-hook (lambda () (linum-mode -1)))
 
 ;; dired mode stuff
-;; This advises the find file function to be aware of subdirs in dired mode
+;; This advises functions to be aware of subdirs in dired mode
 (defun dired-subdir-aware (orig-fun &rest args)
   (if (eq major-mode 'dired-mode)
       (let ((default-directory (dired-current-directory)))
         (apply orig-fun args))
     (apply orig-fun args)))
 
+(advice-add 'read-file-name :around 'dired-subdir-aware)
 (advice-add 'find-file-read-args :around 'dired-subdir-aware)
+(advice-add 'dired-do-compress-to :around 'dired-subdir-aware)
 
 
 (defun kill-buffer-other-window-and-close()
