@@ -45,6 +45,7 @@
 ;; (let ((frame-background-mode 'light)) (frame-set-background-mode nil))
 
 
+;; linum stuff
 (global-linum-mode)
 (setq linum-format "%d ")
 
@@ -52,6 +53,17 @@
 
 (add-hook 'dired-mode-hook (lambda () (linum-mode -1)))
 (add-hook 'image-mode-hook (lambda () (linum-mode -1)))
+
+;; dired mode stuff
+;; This advises the find file function to be aware of subdirs in dired mode
+(defun dired-subdir-aware (orig-fun &rest args)
+  (if (eq major-mode 'dired-mode)
+      (let ((default-directory (dired-current-directory)))
+        (apply orig-fun args))
+    (apply orig-fun args)))
+
+(advice-add 'find-file-read-args :around 'dired-subdir-aware)
+
 
 (defun kill-buffer-other-window-and-close()
   "If there are multiple windows, then close the other window and kill the buffer in it also."
@@ -70,9 +82,6 @@
           (kill-this-buffer)
           (if (not (one-window-p))
               (delete-window)))))))
-        
-(defun compare-window-buffer-name-with-other-window-buffer-name()
-  (interactive)
         
 
 (global-set-key (kbd "C-x K") 'kill-buffer-other-window-and-close)
