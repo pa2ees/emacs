@@ -51,10 +51,11 @@
 
 (add-hook 'doc-view-mode-hook (lambda () (linum-mode -1)))
 
-(add-hook 'dired-mode-hook (lambda () (linum-mode -1)))
 (add-hook 'image-mode-hook (lambda () (linum-mode -1)))
 
-;; dired mode stuff
+
+;; ************* DIRED MODE STUFF ********************
+
 ;; This advises functions to be aware of subdirs in dired mode
 (defun dired-subdir-aware (orig-fun &rest args)
   (if (eq major-mode 'dired-mode)
@@ -65,6 +66,144 @@
 (advice-add 'read-file-name :around 'dired-subdir-aware)
 (advice-add 'find-file-read-args :around 'dired-subdir-aware)
 (advice-add 'dired-do-compress-to :around 'dired-subdir-aware)
+
+(defun dired-sort-set-mode-line-extended ()
+  (when (eq major-mode 'dired-mode)
+    (setq mode-name
+          (let ((sorting-reversed (string-match-p (dired-get-match-string-for-switch "r") dired-actual-switches))
+                case-fold-search)
+            (let ((rev-str (if sorting-reversed
+                               " Rev "
+                             " ")))
+
+              (cond ((string-match-p
+                      (dired-get-match-string-for-switch "X") dired-actual-switches)
+                     (concat "Dired by Ext" rev-str))
+                    ((string-match-p
+                      (dired-get-match-string-for-switch "U") dired-actual-switches)
+                     (concat "Dired by dir order" rev-str))
+                    ((string-match-p
+                      (dired-get-match-string-for-switch "S") dired-actual-switches)
+                     (concat "Dired by Size" rev-str))
+                    ((string-match-p
+                      (dired-get-match-string-for-switch "t") dired-actual-switches)
+                     (concat "Dired by Date" rev-str))
+                    (t
+                     (concat "Dired by Name" rev-str))))))
+    (force-mode-line-update)))
+
+(advice-add 'dired-sort-set-mode-line :override 'dired-sort-set-mode-line-extended)
+
+
+(defun dired-remove-sort-all ()
+  (progn
+    (dired-remove-sort "t")
+    (dired-remove-sort "S")
+    (dired-remove-sort "X")
+    (dired-remove-sort "U")))
+
+(defun dired-get-match-string-for-switch (arg)
+  (if (> (string-to-char arg) (string-to-char "Z"))
+      (concat "\\(\\`\\| \\)-\\([a-"
+              (char-to-string (- (string-to-char arg) 1))
+              (char-to-string (+ (string-to-char arg) 1))
+              "-zA-Z]*\\)\\("
+              arg
+              "\\)\\([^ ]*\\)")
+    (concat "\\(\\`\\| \\)-\\([a-"
+            (char-to-string (- (string-to-char arg) 1))
+            (char-to-string (+ (string-to-char arg) 1))
+            "-zA-Z]*\\)\\("
+            arg
+            "\\)\\([^ ]*\\)")))
+
+(defun dired-remove-sort (arg)
+  ;;(let ((switch-regexp (concat "\\(\\`\\| \\)-\\([a-zA-Z[^" arg "]]*\\)\\(" arg "\\)\\([^ ]*\\)"))
+  (let ((switch-regexp (dired-get-match-string-for-switch arg))
+                       case-fold-search)
+    ;; Remove the -t switch.
+    (while (string-match switch-regexp dired-actual-switches)
+      (if (and (equal (match-string 2 dired-actual-switches) "")
+               (equal (match-string 4 dired-actual-switches) ""))
+          ;; Remove a stand-alone -t switch.
+          (progn
+            (setq dired-actual-switches
+                  (replace-match "" t t dired-actual-switches)))
+        (message switch-regexp)
+        ;; Remove a switch of the form -XtY for some X and Y.
+        (setq dired-actual-switches
+              (replace-match "" t t dired-actual-switches 3))))))
+
+(defun dired-do-sort (arg)
+  (setq dired-actual-switches
+        (concat dired-actual-switches
+                (if (string-match-p "\\`-[[:alnum:]]+\\'"
+                                    dired-actual-switches)
+                    arg
+                  (concat " -" arg))))
+  (dired-sort-set-mode-line))
+
+(defun dired-sort-file-extension ()
+  (interactive)
+  (dired-remove-sort-all)
+  (dired-do-sort "X")
+  (revert-buffer)
+  (message "Sorting by File Extension"))
+
+(defun dired-sort-filename ()
+  (interactive)
+  (dired-remove-sort-all)
+  (dired-sort-set-mode-line)
+  (revert-buffer)
+  (message "Sorting by Filename"))
+
+(defun dired-sort-directory-order ()
+  (interactive)
+  (dired-remove-sort-all)
+  (dired-do-sort "U")
+  (revert-buffer)
+  (message "Sorting by Directory Order"))
+
+(defun dired-sort-size ()
+  (interactive)
+  (dired-remove-sort-all)
+  (dired-do-sort "S")
+  (revert-buffer)
+  (message "Sorting by File Size"))
+
+(defun dired-sort-time ()
+  (interactive)
+  (dired-remove-sort-all)
+  (dired-do-sort "t")
+  (revert-buffer)
+  (message "Sorting by File Modification Date/Time"))
+
+(defun dired-sort-reversed-toggle ()
+  (let ((sorting-reversed (string-match-p (dired-get-match-string-for-switch "r") dired-actual-switches))
+        case-fold-search)
+    (if sorting-reversed
+        (progn
+          (dired-remove-sort "r")
+          (dired-sort-set-mode-line))
+      (dired-do-sort "r")))
+  (revert-buffer)
+  (message "Toggled Reverse Sorting"))
+
+
+  
+(add-hook 'dired-mode-hook (lambda ()
+                             (setq dired-actual-switches "-Blh --group-directories-first")
+                             (local-set-key (kbd "M-s s x") (lambda() (interactive) (dired-sort-file-extension)))
+                             (local-set-key (kbd "M-s s D") (lambda() (interactive) (dired-sort-directory-order)))
+                             (local-set-key (kbd "M-s s f") (lambda() (interactive) (dired-sort-filename)))
+                             (local-set-key (kbd "M-s s n") (lambda() (interactive) (dired-sort-filename)))
+                             (local-set-key (kbd "M-s s s") (lambda() (interactive) (dired-sort-size)))
+                             (local-set-key (kbd "M-s s t") (lambda() (interactive) (dired-sort-time)))
+                             (local-set-key (kbd "M-s s d") (lambda() (interactive) (dired-sort-time)))
+                             (local-set-key (kbd "M-s s r") (lambda() (interactive) (dired-sort-reversed-toggle)))
+                             (linum-mode -1)))
+
+;; **************** END DIRED STUFF ******************
 
 
 (defun kill-buffer-other-window-and-close()
@@ -159,15 +298,20 @@
                ("python" (mode . python-mode))
                ("verilog" (mode . verilog-mode))
                ("erc" (mode . erc-mode))
+               ("lisp" (or
+                            (mode . emacs-lisp-mode)))
                ("planner" (or
                            (name . "^\\*Calendar\\*$")
                            (name . "^diary$")
                            (mode . muse-mode)))
-               ("emacs" (or
-                         (name . "^\\*scratch\\*$")
-                         (name . "^\\*Messages\\*$")))
                ("magit" (or
                          (name . "^magit*")))
+               ("archives" (or
+                              (mode . archive-mode)))
+               ("emacs" (or
+                         (name . "^\\*scratch\\*$")
+                         (name . "^\\*Help\\*$")
+                         (name . "^\\*Messages\\*$")))
                ("gnus" (or
                         (mode . message-mode)
                         (mode . bbdb-mode)
@@ -176,12 +320,22 @@
                         (mode . gnus-summary-mode)
                         (mode . gnus-article-mode)
                         (name . "^\\.bbdb$")
-                        (name . "^\\.newsrc-dribble")))))))
+                        (name . "^\\.newsrc-dribble")))
+               ("hidden" (or
+                          (name . "^\\*Dired log\\*$")
+                          (name . "^\\*Completions\\*$")
+                          (name . "^\\*Shell Command Output\\*$")
+                          (name . "^\\*Backtrace\\*$")))))))
+
+
 
 (setq ibuffer-never-show-predicates (list "^\\*tramp*" "^\\*epc*"))
 (add-hook 'ibuffer-mode-hook
           (lambda ()
-            (ibuffer-switch-to-saved-filter-groups "default")))
+            (progn
+              (ibuffer-switch-to-saved-filter-groups "default")
+              (push "hidden" ibuffer-hidden-filter-groups)
+              (message "fart"))))
 
 (setq ibuffer-show-empty-filter-groups nil)
 
