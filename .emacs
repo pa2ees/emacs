@@ -54,6 +54,11 @@
 (add-hook 'image-mode-hook (lambda () (linum-mode -1)))
 
 
+;; ************* ORG MODE STUFF ********************
+
+(global-set-key (kbd "C-c l") 'org-store-link)
+
+
 ;; ************* DIRED MODE STUFF ********************
 
 ;; This advises functions to be aware of subdirs in dired mode
@@ -258,6 +263,24 @@
 ;; **************** END DIRED STUFF ******************
 
 
+;; Python Stuff
+
+(setq python-shell-interpreter "ipython"
+      python-shell-interpreter-args "-i --simple-prompt")
+
+;; jedi - python completion
+(add-hook 'python-mode-hook 'jedi:setup)
+(setq jedi:complete-on-dot t)
+
+;; (setq python-shell-interpreter "ipython")
+
+(add-hook 'python-mode-hook
+	  (lambda () (progn
+		       (jedi:setup)
+		       (setq jedi:complete-on-dot t)
+		       (setq python-indent-offset 4))))
+
+
 (defun kill-buffer-other-window-and-close()
   "If there are multiple windows, then close the other window and kill the buffer in it also."
   (interactive)
@@ -303,13 +326,6 @@
 
 (global-highlight-parentheses-mode)
 
-(setq python-shell-interpreter "ipython")
-
-(add-hook 'python-mode-hook
-	  (lambda () (progn
-		       (jedi:setup)
-		       (setq jedi:complete-on-dot t)
-		       (setq python-indent-offset 4))))
 
 ;; reverting buffers
 (defun revert-all-buffers ()
@@ -335,9 +351,6 @@
 (setenv "GIT_ASKPASS" "git-gui--askpass")
 (setenv "SSH_ASKPASS" "git-gui--askpass")
 
-;; jedi - python completion
-(add-hook 'python-mode-hook 'jedi:setup)
-(setq jedi:complete-on-dot t)
 
 
 ;; ibuffer - an enhanced buffer switching tool
@@ -347,7 +360,9 @@
       (quote (("default"
                ("dired" (mode . dired-mode))
                ("perl" (mode . cperl-mode))
-               ("python" (mode . python-mode))
+               ("python" (or
+                          (mode . python-mode)
+                          (mode . inferior-python-mode)))
                ("verilog" (mode . verilog-mode))
                ("erc" (mode . erc-mode))
                ("lisp" (or
