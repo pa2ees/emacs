@@ -415,7 +415,7 @@
         ;; the mode's map (see verilog-mode.el)                      
         (define-key verilog-mode-map (kbd ";") 'self-insert-command)
         (define-key verilog-mode-map (kbd ":") 'self-insert-command)
-        (define-key verilog-mode-map (kbd "RET") 'evil-ret)))
+        (define-key verilog-mode-map (kbd "RET") 'newline)))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -435,4 +435,5 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
 
