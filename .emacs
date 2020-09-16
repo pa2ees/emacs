@@ -226,6 +226,9 @@
 
 (global-set-key (kbd "C-s") 'swiper-helm)
 
+(global-set-key (kbd "M-x") 'helm-M-x)
+(global-set-key (kbd "C-x C-f") 'helm-find-files)
+
 
 ;; Verilog mode disable auto formatting                                   
 
@@ -262,6 +265,8 @@
 (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
 
 
+(require 'helm-projectile)
+(helm-projectile-on)
 
 
 (custom-set-variables
@@ -275,7 +280,7 @@
  '(inhibit-startup-screen t)
  '(package-selected-packages
    (quote
-    (projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl pdf-tools jedi smartparens magit highlight-parentheses abyss-theme))))
+    (helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl pdf-tools jedi smartparens magit highlight-parentheses abyss-theme))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
