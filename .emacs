@@ -76,21 +76,7 @@
 
 
 ;; Python Stuff
-
-(setq python-shell-interpreter "ipython"
-      python-shell-interpreter-args "-i --simple-prompt")
-
-;; jedi - python completion
-(add-hook 'python-mode-hook 'jedi:setup)
-(setq jedi:complete-on-dot t)
-
-;; (setq python-shell-interpreter "ipython")
-
-(add-hook 'python-mode-hook
-	  (lambda () (progn
-		       (jedi:setup)
-		       (setq jedi:complete-on-dot t)
-		       (setq python-indent-offset 4))))
+(load-file (concat user-emacs-init-directory "init_python.el"))
 
 
 (defun kill-buffer-other-window-and-close()
@@ -163,60 +149,8 @@
 (setenv "GIT_ASKPASS" "git-gui--askpass")
 (setenv "SSH_ASKPASS" "git-gui--askpass")
 
-
-
-;; ibuffer - an enhanced buffer switching tool
-(global-set-key (kbd "C-x C-b") 'ibuffer)
-
-(setq ibuffer-saved-filter-groups
-      (quote (("default"
-               ("dired" (mode . dired-mode))
-               ("perl" (mode . cperl-mode))
-               ("python" (or
-                          (mode . python-mode)
-                          (mode . inferior-python-mode)))
-               ("verilog" (mode . verilog-mode))
-               ("erc" (mode . erc-mode))
-               ("lisp" (or
-                            (mode . emacs-lisp-mode)))
-               ("planner" (or
-                           (name . "^\\*Calendar\\*$")
-                           (name . "^diary$")
-                           (mode . muse-mode)))
-               ("magit" (or
-                         (name . "^magit*")))
-               ("archives" (or
-                              (mode . archive-mode)))
-               ("emacs" (or
-                         (name . "^\\*scratch\\*$")
-                         (name . "^\\*Help\\*$")
-                         (name . "^\\*Messages\\*$")))
-               ("gnus" (or
-                        (mode . message-mode)
-                        (mode . bbdb-mode)
-                        (mode . mail-mode)
-                        (mode . gnus-group-mode)
-                        (mode . gnus-summary-mode)
-                        (mode . gnus-article-mode)
-                        (name . "^\\.bbdb$")
-                        (name . "^\\.newsrc-dribble")))
-               ("hidden" (or
-                          (name . "^\\*Dired log\\*$")
-                          (name . "^\\*Completions\\*$")
-                          (name . "^\\*Shell Command Output\\*$")
-                          (name . "^\\*Backtrace\\*$")))))))
-
-
-
-(setq ibuffer-never-show-predicates (list "^\\*tramp*" "^\\*epc*"))
-(add-hook 'ibuffer-mode-hook
-          (lambda ()
-            (progn
-              (ibuffer-switch-to-saved-filter-groups "default")
-              (push "hidden" ibuffer-hidden-filter-groups)
-              (message "fart"))))
-
-(setq ibuffer-show-empty-filter-groups nil)
+;; IBuffer stuff
+(load-file (concat user-emacs-init-directory "init_ibuffer.el"))
 
 ;; HELM Mode stuff
 (require 'helm-config)
@@ -230,34 +164,8 @@
 (global-set-key (kbd "C-x C-f") 'helm-find-files)
 
 
-;; Verilog mode disable auto formatting                                   
-
-(defun fix-verilog-indent ()
-    "Fix stupid verilog indenting"
-    (interactive)
-    (setq-local indent-line-function 'indent-relative))
-
-(add-hook 'verilog-mode-hook
-          (lambda ()
-            (progn
-              ;; This screws up indentation in other buffers
-              ;; (add-hook 'hack-local-variables-hook
-              ;;           (lambda ()
-              ;;             (setq indent-line-function 'indent-relative)))
-              (setq verilog-auto-lineup 'ignore)
-              (setq auto-indent-on-newline nil)
-              (setq verilog-auto-newline nil))))
-
-              
-
-(eval-after-load 'verilog-mode
-    '(progn
-        ;; same for all the electric-verilog-* commands in                
-        ;; the mode's map (see verilog-mode.el)                      
-        (define-key verilog-mode-map (kbd ";") 'self-insert-command)
-        (define-key verilog-mode-map (kbd ":") 'self-insert-command)
-        (define-key verilog-mode-map (kbd "RET") 'newline)))
-
+;; Verilog stuff
+(load-file (concat user-emacs-init-directory "init_verilog.el"))
 
 ;; PROJECTILE - project management
 
