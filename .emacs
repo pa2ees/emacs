@@ -177,6 +177,106 @@
 (helm-projectile-on)
 
 
+
+;; SPACELINE STUFF
+
+(defface large-font
+  '((t :height 120))
+  "my large font face"
+  )
+
+(use-package spaceline :ensure t
+  :config
+  (use-package spaceline-config
+    :config
+    ;(spaceline-toggle-minor-modes-off)
+    ;(spaceline-toggle-buffer-encoding-off)
+    ;(spaceline-toggle-buffer-encoding-abbrev-off)
+    ;(setq powerline-default-separator 'rounded)
+    (setq powerline-default-separator 'zigzag)
+    (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
+    (spaceline-define-segment line-column
+      "The current line and column numbers."
+      "%l:%c")
+    (spaceline-define-segment datetime
+      "current datetime"
+      (propertize
+       (format-time-string "%d %h %H:%M" )
+       'face 'large-font))
+    (spaceline-define-segment time
+      "The current time."
+      (format-time-string "%H:%M"))
+    (spaceline-define-segment date
+      "The current date."
+      (format-time-string "%h %d"))
+    (spaceline-define-segment fart
+      "a big fart"
+      "fart")
+    (spaceline-toggle-time-on)
+    (spaceline-toggle-buffer-id-on)
+    (spaceline-emacs-theme 'date 'time 'datetime)))
+
+;; Create new segment with filename as large font
+(spaceline-define-segment new-buffer-id
+  "Name of buffer."
+  (s-trim (spaceline--string-trim-from-center
+           (propertize
+            (if
+                (and
+                 (buffer-file-name) (projectile-project-root))
+                (file-relative-name buffer-file-name (projectile-project-root))
+              (powerline-buffer-id 'default-face))
+              'face 'large-font)
+            spaceline-buffer-id-max-length)))
+
+(spaceline-compile
+  ; left side
+  '(((persp-name
+      workspace-number
+      window-number)
+     :fallback evil-state
+     :face highlight-face
+     :priority 100)
+    (anzu :priority 95)
+    auto-compile
+    ((buffer-modified buffer-size remote-host)
+     :priority 98)
+    ((projectile-root new-buffer-id)
+     :priority 97
+     :separator " | ")
+    (major-mode :priority 79)
+    (process :when active)
+    ((flycheck-error flycheck-warning flycheck-info)
+     :when active
+     :priority 89)
+    (minor-modes :when active
+                 :priority 9)
+    (mu4e-alert-segment :when active)
+    (erc-track :when active)
+    (version-control :when active
+                     :priority 78)
+    (org-pomodoro :when active)
+    (org-clock :when active)
+    nyan-cat)
+  ; right side
+  '(which-function
+    (python-pyvenv :fallback python-pyenv)
+    (purpose :priority 94)
+    (battery :when active)
+    (selection-info :priority 95)
+    ;input-method
+    ;; ((buffer-encoding-abbrev
+    ;;   point-position
+    ;;   line-column)
+    ;;  :separator " | "
+    ;;  :priority 96)
+                                        ;(global :when active)
+    (line-column :priority 90)
+    (datetime :priority 97)
+    (buffer-position :priority 99)
+    (hud :priority 99)))
+
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -184,11 +284,11 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("d8dc153c58354d612b2576fea87fe676a3a5d43bcc71170c62ddde4a1ad9e1fb" default)))
+    ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" "d8dc153c58354d612b2576fea87fe676a3a5d43bcc71170c62ddde4a1ad9e1fb" default)))
  '(inhibit-startup-screen t)
  '(package-selected-packages
    (quote
-    (helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl pdf-tools jedi smartparens magit highlight-parentheses abyss-theme))))
+    (spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl pdf-tools jedi smartparens magit highlight-parentheses abyss-theme))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
