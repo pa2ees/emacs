@@ -1,6 +1,6 @@
 
 (defface large-font
-  '((t :height 120))
+  '((t :height 170))
   "my large font face"
   )
 

@@ -26,12 +26,41 @@
 ;; You may delete these explanatory comments.
 (package-initialize)
 
-(setq inhibit-startup-screen t)
 
+;; TODO
+;; flycheck (syntax checking)
+;; company (complete-anything)
+  ;; including company-jedi (already using jedi) ??
+  ;; use irony with this?
+  ;; works with helm!
+;; ggtags http://www.mycpu.org/emacs-rtags-helm/ uses gnu-global
+;; rtags completion tags
+  ;;can use helm
+  ;; needs libclang?
+;; irony completion tags
+  ;; needs libclang?
+;; elpy for python stuff?
+
+;; https://trivialfis.github.io/emacs/2017/08/02/C-C++-Development-Environment-on-Emacs.html
+
+
+(use-package general
+  :ensure t)
+
+
+;; misc setup things
+(setq inhibit-startup-screen t)
 (put 'narrow-to-region 'disabled nil)
 
+;; make default font height bigger!
+(set-face-attribute 'default nil :height 150)
+
+;; programming files basic stuff
 (setq c-default-style "linux")
 (setq-default c-basic-offset 4)
+(setq-default indent-tabs-mode nil)
+(setq default-tab-width 4)
+
 
 ;; (setq scroll-step 1)
 (setq scroll-margin 4) ;; sets how far away from top or bottom we start to scroll
@@ -42,9 +71,11 @@
 ;; Truncate lines always
 (set-default 'truncate-lines t)
 
+;; melpa
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
 
+;; Themes
 ;; (load-theme 'abyss t t)
 ;; (enable-theme 'abyss)
 (load-theme 'manoj-dark t)
@@ -52,107 +83,76 @@
 ;; (set-background-color "black")
 ;; (let ((frame-background-mode 'light)) (frame-set-background-mode nil))
 
+;; ************* COMPANY MODE STUFF ****************
 
-;; linum stuff
+
+;; ************* LINUM STUFF ***********************
 (global-linum-mode)
-(setq linum-format "%d ")
+;; (setq linum-format "%d ")
 
+;; image mode and doc view mode don't like linum mode
 (add-hook 'doc-view-mode-hook (lambda () (linum-mode -1)))
-
 (add-hook 'image-mode-hook (lambda () (linum-mode -1)))
 
 
 ;; ************* ORG MODE STUFF ********************
-
 (global-set-key (kbd "C-c l") 'org-store-link)
 
 
-;; ************* DIRED MODE STUFF ********************
-
+;; ************* DIRED MODE STUFF ******************
 (load-file (concat user-emacs-init-directory "init_dired.el"))
 
 
-;; **************** END DIRED STUFF ******************
-
-
-;; Python Stuff
+;; ************* PYTHON STUFF **********************
 (load-file (concat user-emacs-init-directory "init_python.el"))
 
 
-(defun kill-buffer-other-window-and-close()
-  "If there are multiple windows, then close the other window and kill the buffer in it also."
-  (interactive)
-  (let ((local-buff (buffer-name)))
-    (other-window 1)
-    (let ((other-window-buff (buffer-name)))
-      (other-window -1)
-      (if (string= local-buff other-window-buff)
-          (progn
-            (other-window 1)
-            (if (not (one-window-p))
-                (delete-window)))
-        (progn
-          (other-window 1)
-          (kill-this-buffer)
-          (if (not (one-window-p))
-              (delete-window)))))))
-        
-
-(global-set-key (kbd "C-x K") 'kill-buffer-other-window-and-close)
-
-;; PDF Tools
-;; (pdf-tools-install)
-
-;; (add-hook 'pdf-view-mode-hook (lambda () (progn
-;;                                            (linum-mode -1)
-;;                                            (local-set-key (kbd "C-p") (lambda () (interactive) (pdf-view-previous-line-or-previous-page 6)))
-;;                                            (local-set-key (kbd "C-n") (lambda () (interactive) (pdf-view-next-line-or-next-page 6))))))
-
-;; (setq-default pdf-view-display-size 'fit-page)
-;; (setq-default pdf-view-continuous nil)
+;; ************* PDF STUFF *************************
+(load-file (concat user-emacs-init-directory "init_pdf.el"))
 
 
-;; (pdf-view-next-line-or-next-page 6)
-
-
-(setq-default indent-tabs-mode nil)
-(setq default-tab-width 4)
-
+;; ************* PARENS STUFF **********************
+;; smart-parens were getting kinda annoying
 ;; (require 'smartparens-config)
 ;; (smartparens-global-mode 1)
 ;; (show-smartparens-global-mode -1)
 
+;; highlighting parens is good
 (global-highlight-parentheses-mode)
 
 
-;; reverting buffers
-(defun revert-all-buffers ()
-    "Refreshes all open buffers from their respective files."
-    (interactive)
-    (dolist (buf (buffer-list))
-      (with-current-buffer buf
-        (when (and (buffer-file-name) (file-exists-p (buffer-file-name)) (not (buffer-modified-p)))
-          (revert-buffer t t t) )))
-    (message "Refreshed open files.") )
+;; ************* MY FUNCTIONS **********************
+(load-file (concat user-emacs-init-directory "init_my_functions.el"))
 
-(defun revert-buffer-no-confirm ()
-    "Revert buffer without confirmation."
-    (interactive)
-    (revert-buffer t t)
-    (message "Buffer reverted!!"))
-
+;; bind keyboard commands to my functions
 (global-set-key (kbd "<f5>") 'revert-buffer-no-confirm)
 (global-set-key (kbd "C-<f5>") 'revert-all-buffers)
+(global-set-key (kbd "C-x K") 'kill-buffer-other-window-and-close)
 
-;; magit
+
+;; ************* YASNIPPET STUFF *******************
+(use-package yasnippet
+  :ensure t
+  :config
+  (use-package yasnippet-snippets
+    :ensure t)
+  (setq yas-snippet-dirs (cons (concat user-emacs-init-directory "snippets/") yas-snippet-dirs))
+  (yas-reload-all))
+
+(yas-global-mode 1)
+
+
+;; ************* MAGIT STUFF ***********************
 (global-set-key (kbd "C-x g") 'magit-status)
 (setenv "GIT_ASKPASS" "git-gui--askpass")
 (setenv "SSH_ASKPASS" "git-gui--askpass")
 
-;; IBuffer stuff
+
+;; ************* IBUFF STUFF ***********************
 (load-file (concat user-emacs-init-directory "init_ibuffer.el"))
 
-;; HELM Mode stuff
+
+;; ************* HELM MODE STUFF *******************
 (require 'helm-config)
 (require 'swiper-helm)
 
@@ -164,11 +164,11 @@
 (global-set-key (kbd "C-x C-f") 'helm-find-files)
 
 
-;; Verilog stuff
+;; ************* VERILOG STUFF *********************
 (load-file (concat user-emacs-init-directory "init_verilog.el"))
 
-;; PROJECTILE - project management
 
+;; ************* PROJECTILE STUFF ******************
 (projectile-mode +1)
 (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
 
@@ -177,14 +177,10 @@
 (helm-projectile-on)
 
 
-
-;; SPACELINE STUFF
-
+;; ************* SPACELINE STUFF *******************
 (load-file (concat user-emacs-init-directory "init_spaceline.el"))
 
 
-;; make default font height bigger!
-(set-face-attribute 'default nil :height 150)
 
 
 (custom-set-variables
@@ -198,7 +194,7 @@
  '(inhibit-startup-screen t)
  '(package-selected-packages
    (quote
-    (spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl pdf-tools jedi smartparens magit highlight-parentheses abyss-theme))))
+    (elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl pdf-tools jedi smartparens magit highlight-parentheses abyss-theme))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
