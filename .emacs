@@ -276,6 +276,8 @@
     (buffer-position :priority 99)
     (hud :priority 99)))
 
+;; make default font height bigger!
+(set-face-attribute 'default nil :height 150)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
