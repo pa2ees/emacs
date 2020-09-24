@@ -46,8 +46,8 @@
 ;;   (add-to-list 'company-backends 'company-jedi)
 ;;   (setq jedi:complete-on-dot t))
 
-(if (version< emacs-version "26.3")
-    (progn
+;;(if (version< emacs-version "26.3")
+;;    (progn
       
       ;; jedi - python completion
       (add-hook 'python-mode-hook 'jedi:setup)
@@ -59,8 +59,8 @@
                 (lambda () (progn
                              (jedi:setup)
                              (setq jedi:complete-on-dot t)
-                             (setq python-indent-offset 4)))))
-    (progn
+                             (setq python-indent-offset 4))))
+;;    (progn
       ;; (use-package company
       ;;   :ensure t
       ;;   :config
@@ -86,7 +86,7 @@
       ;;   (add-to-list 'company-backends 'company-jedi)
       ;;   (setq jedi:complete-on-dot t))))
       ;; ELPY doesn't work with linum mode???
-      (use-package elpy
-        :ensure t
-        :config
-        (elpy-enable))))
+      ;; (use-package elpy
+      ;;   :ensure t
+      ;;   :config
+      ;;   (elpy-enable))))

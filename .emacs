@@ -139,7 +139,8 @@
   (setq yas-snippet-dirs (cons (concat user-emacs-init-directory "snippets/") yas-snippet-dirs))
   (yas-reload-all))
 
-(yas-global-mode 1)
+;; this got annoying, better to enable when needed? or in the mode needed?
+;; (yas-global-mode 1)
 
 
 ;; ************* MAGIT STUFF ***********************
