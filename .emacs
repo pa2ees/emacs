@@ -43,6 +43,9 @@
 
 ;; https://trivialfis.github.io/emacs/2017/08/02/C-C++-Development-Environment-on-Emacs.html
 
+;; check out ibuffer-projectile or ibuffer-vc (ibuffer version control)
+
+
 
 (use-package general
   :ensure t)
@@ -181,7 +184,15 @@
 ;; ************* SPACELINE STUFF *******************
 (load-file (concat user-emacs-init-directory "init_spaceline.el"))
 
+;; ************* LSP-MODE STUFF ********************
 
+(setq lsp-keymap-prefix "C-c C-l")
+(use-package lsp-mode
+  :hook ((c++-mode . lsp)
+         (lsp-mode . lsp-enable-which-key-integration))
+  :commands lsp)
+
+(use-package helm-lsp :commands helm-lsp-workspace-symbol)
 
 
 (custom-set-variables
@@ -195,7 +206,7 @@
  '(inhibit-startup-screen t)
  '(package-selected-packages
    (quote
-    (elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl pdf-tools jedi smartparens magit highlight-parentheses abyss-theme))))
+    (helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl pdf-tools jedi smartparens magit highlight-parentheses abyss-theme))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

@@ -4,6 +4,9 @@
 (setq ibuffer-saved-filter-groups
       (quote (("default"
                ("dired" (mode . dired-mode))
+               ("C/C++" (or
+                         (mode . c++-mode)
+                         (mode . c-mode)))
                ("perl" (mode . cperl-mode))
                ("python" (or
                           (mode . python-mode)
@@ -33,6 +36,8 @@
                         (mode . gnus-article-mode)
                         (name . "^\\.bbdb$")
                         (name . "^\\.newsrc-dribble")))
+               ("helm" (or
+                        (name . "\*helm-\*")))
                ("hidden" (or
                           (name . "^\\*Dired log\\*$")
                           (name . "^\\*Completions\\*$")
@@ -47,6 +52,7 @@
             (progn
               (ibuffer-switch-to-saved-filter-groups "default")
               (push "hidden" ibuffer-hidden-filter-groups)
+              (push "helm" ibuffer-hidden-filter-groups)
               (message "fart"))))
 
 (setq ibuffer-show-empty-filter-groups nil)
