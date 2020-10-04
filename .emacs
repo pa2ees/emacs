@@ -45,6 +45,20 @@
 
 ;; check out ibuffer-projectile or ibuffer-vc (ibuffer version control)
 
+;; need to change everything to use-package
+
+
+;; melpa
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+
+(require 'package)
+(require 'use-package)
+(require 'helm-config)
+;;(require 'swiper-helm)
+(require 'helm-projectile)
+
+
+
 
 
 (use-package general
@@ -73,10 +87,6 @@
 
 ;; Truncate lines always
 (set-default 'truncate-lines t)
-
-;; melpa
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
 
 ;; Themes
 ;; (load-theme 'abyss t t)
@@ -111,7 +121,7 @@
 
 
 ;; ************* PDF STUFF *************************
-(load-file (concat user-emacs-init-directory "init_pdf.el"))
+;;(load-file (concat user-emacs-init-directory "init_pdf.el"))
 
 
 ;; ************* PARENS STUFF **********************
@@ -147,6 +157,8 @@
 
 
 ;; ************* MAGIT STUFF ***********************
+(use-package magit
+  :ensure t)
 (global-set-key (kbd "C-x g") 'magit-status)
 (setenv "GIT_ASKPASS" "git-gui--askpass")
 (setenv "SSH_ASKPASS" "git-gui--askpass")
@@ -157,19 +169,12 @@
 
 
 ;; ************* HELM MODE STUFF *******************
-(require 'helm-config)
-(require 'swiper-helm)
-
-(helm-mode 1)
-
-(global-set-key (kbd "C-s") 'swiper-helm)
-
-(global-set-key (kbd "M-x") 'helm-M-x)
-(global-set-key (kbd "C-x C-f") 'helm-find-files)
+(load-file (concat user-emacs-init-directory "init_helm.el"))
+(load-file (concat user-emacs-init-directory "init_org.el"))
 
 
 ;; ************* VERILOG STUFF *********************
-(load-file (concat user-emacs-init-directory "init_verilog.el"))
+;(load-file (concat user-emacs-init-directory "init_verilog.el"))
 
 
 ;; ************* PROJECTILE STUFF ******************
@@ -177,7 +182,6 @@
 (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
 
 
-(require 'helm-projectile)
 (helm-projectile-on)
 
 
@@ -186,13 +190,13 @@
 
 ;; ************* LSP-MODE STUFF ********************
 
-(setq lsp-keymap-prefix "C-c C-l")
-(use-package lsp-mode
-  :hook ((c++-mode . lsp)
-         (lsp-mode . lsp-enable-which-key-integration))
-  :commands lsp)
+;; (setq lsp-keymap-prefix "C-c C-l")
+;; (use-package lsp-mode
+;;   :hook ((c++-mode . lsp)
+;;          (lsp-mode . lsp-enable-which-key-integration))
+;;   :commands lsp)
 
-(use-package helm-lsp :commands helm-lsp-workspace-symbol)
+;; (use-package helm-lsp :commands helm-lsp-workspace-symbol)
 
 
 (custom-set-variables
@@ -201,12 +205,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   (quote
-    ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" "d8dc153c58354d612b2576fea87fe676a3a5d43bcc71170c62ddde4a1ad9e1fb" default)))
+   '("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" "d8dc153c58354d612b2576fea87fe676a3a5d43bcc71170c62ddde4a1ad9e1fb" default))
  '(inhibit-startup-screen t)
  '(package-selected-packages
-   (quote
-    (helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl pdf-tools jedi smartparens magit highlight-parentheses abyss-theme))))
+   '(helm-org helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl pdf-tools jedi smartparens magit highlight-parentheses abyss-theme)))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
