@@ -111,7 +111,7 @@
 
 
 ;; ************* PDF STUFF *************************
-(load-file (concat user-emacs-init-directory "init_pdf.el"))
+;; (load-file (concat user-emacs-init-directory "init_pdf.el"))
 
 
 ;; ************* PARENS STUFF **********************
@@ -131,16 +131,18 @@
 (global-set-key (kbd "<f5>") 'revert-buffer-no-confirm)
 (global-set-key (kbd "C-<f5>") 'revert-all-buffers)
 (global-set-key (kbd "C-x K") 'kill-buffer-other-window-and-close)
+(global-set-key (kbd "M-f") 'forward-to-word)
 
+(setq-default tab-width 4)
 
 ;; ************* YASNIPPET STUFF *******************
-(use-package yasnippet
-  :ensure t
-  :config
-  (use-package yasnippet-snippets
-    :ensure t)
-  (setq yas-snippet-dirs (cons (concat user-emacs-init-directory "snippets/") yas-snippet-dirs))
-  (yas-reload-all))
+;; (use-package yasnippet
+;;   :ensure t
+;;   :config
+;;   (use-package yasnippet-snippets
+;;     :ensure t)
+;;   (setq yas-snippet-dirs (cons (concat user-emacs-init-directory "snippets/") yas-snippet-dirs))
+;;   (yas-reload-all))
 
 ;; this got annoying, better to enable when needed? or in the mode needed?
 ;; (yas-global-mode 1)
@@ -158,11 +160,11 @@
 
 ;; ************* HELM MODE STUFF *******************
 (require 'helm-config)
-(require 'swiper-helm)
+;;(require 'swiper-helm)
 
 (helm-mode 1)
 
-(global-set-key (kbd "C-s") 'swiper-helm)
+;;(global-set-key (kbd "C-s") 'swiper-helm)
 
 (global-set-key (kbd "M-x") 'helm-M-x)
 (global-set-key (kbd "C-x C-f") 'helm-find-files)
@@ -171,29 +173,14 @@
 ;; ************* VERILOG STUFF *********************
 (load-file (concat user-emacs-init-directory "init_verilog.el"))
 
-
 ;; ************* PROJECTILE STUFF ******************
-(projectile-mode +1)
-(define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
-
-
-(require 'helm-projectile)
-(helm-projectile-on)
-
+(load-file (concat user-emacs-init-directory "init_projectile.el"))
 
 ;; ************* SPACELINE STUFF *******************
 (load-file (concat user-emacs-init-directory "init_spaceline.el"))
 
 ;; ************* LSP-MODE STUFF ********************
-
-(setq lsp-keymap-prefix "C-c C-l")
-(use-package lsp-mode
-  :hook ((c++-mode . lsp)
-         (lsp-mode . lsp-enable-which-key-integration))
-  :commands lsp)
-
-(use-package helm-lsp :commands helm-lsp-workspace-symbol)
-
+(load-file (concat user-emacs-init-directory "init_lsp-mode.el"))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -206,7 +193,7 @@
  '(inhibit-startup-screen t)
  '(package-selected-packages
    (quote
-    (helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl pdf-tools jedi smartparens magit highlight-parentheses abyss-theme))))
+    (clang-format clang-format+ helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl jedi smartparens magit highlight-parentheses abyss-theme))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
