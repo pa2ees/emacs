@@ -1,6 +1,26 @@
 ;;(add-hook 'org-mode-hook
 ;;            (lambda () (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags-command))))
 
+
+;; need to create templates for
+;;   confluence talk notes
+;;   scripture notes
+;;   promptings
+;; customized templates for org-capture
+;; (setq org-capture-templates
+;;       '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
+;;          "* TODO %?\n  %i\n  %a")
+;;         ("j" "Journal" entry (file+datetree "~/org/journal.org")
+;;          "* %?\nEntered on %U\n  %i\n  %a")))
+
+(setq notes_file_folder "~/projects/notes/")
+(setq work_notes_file (concat notes_file_folder "work.org"))
+(setq notes_file (concat notes_file_folder "notes.org"))
+
+(setq org-capture-templates
+      '(("c" "Conference Talk Note" entry (file+headline notes_file "Conference")
+         "* %^{Year} %^{Session|April|October} %^{Session|Saturday Morning|Saturday Afternoon|Sunday Morning|Sunday Afternoon|Womens|Priesthood}\n** %^{Speaker}\n*** %^{Title} %^g\n%?")))
+
 (defun aj/org-completing-read-tags (prompt coll pred req initial hist def inh)
   (if (not (string= "Tags: " prompt))
       ;; Not a tags prompt.  Use normal completion by calling
