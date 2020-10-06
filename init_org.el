@@ -21,15 +21,25 @@
       '(("c" "Conference Talk Note" entry (file+headline notes_file "Conference")
          "* %^{Year} %^{Session|April|October} %^{Session|Saturday Morning|Saturday Afternoon|Sunday Morning|Sunday Afternoon|Womens|Priesthood}\n** %^{Speaker}\n*** %^{Title} %^g\n%?")))
 
+;; (defun my/org-completing-read-tags (prompt coll pred req initial hist def inh)
+;;   (if (not (string= "Tags: " prompt))
+;;       ;; Not a tags prompt.  Use normal completion by calling
+;;       ;; `org-completing-read' again without this function in
+;;       ;; `helm-completing-read-handlers-alist'
+;;       (let ((helm-completing-read-handlers-alist (rassq-delete-all
+;;                                                   'aj/org-completing-read-tags
+;;                                                   helm-completing-read-handlers-alist)))
+;;         (org-completing-read prompt coll pred req initial hist def inh))
+
 (defun aj/org-completing-read-tags (prompt coll pred req initial hist def inh)
   (if (not (string= "Tags: " prompt))
       ;; Not a tags prompt.  Use normal completion by calling
-      ;; `org-icompleting-read' again without this function in
+      ;; `org-completing-read' again without this function in
       ;; `helm-completing-read-handlers-alist'
       (let ((helm-completing-read-handlers-alist (rassq-delete-all
                                                   'aj/org-completing-read-tags
                                                   helm-completing-read-handlers-alist)))
-        (org-icompleting-read prompt coll pred req initial hist def inh))
+        (helm-comp-read prompt coll pred req initial hist def inh))
     ;; Tags prompt
     (let* ((initial (and (stringp initial)
                          (not (string= initial ""))
