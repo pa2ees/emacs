@@ -1,3 +1,6 @@
 \#*#
 .\#*
 *~
+.emacs.d/elpa
+.emacs.d/url
+.emacs.d/transient
