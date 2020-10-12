@@ -3,57 +3,100 @@
 
 
 ;; need to create templates for
-;;   confluence talk notes
-;;   scripture notes
+;;   *done* confluence talk notes
+;;   *done* scripture notes
 ;;   promptings
-;; customized templates for org-capture
-;; (setq org-capture-templates
-;;       '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
-;;          "* TODO %?\n  %i\n  %a")
-;;         ("j" "Journal" entry (file+datetree "~/org/journal.org")
-;;          "* %?\nEntered on %U\n  %i\n  %a")))
+
+;; TODO: make links to web scriptures
+;; TODO: make emacs understand how to render web scripture pages
 
 (setq notes_file_folder "~/projects/notes/")
 (setq work_notes_file (concat notes_file_folder "work.org"))
 (setq notes_file (concat notes_file_folder "notes.org"))
+(setq spiritual_notes_file (concat notes_file_folder "spiritual.org"))
 (setq conference_notes_file (concat notes_file_folder "conference.org"))
+(setq scripture_notes_file (concat notes_file_folder "scripture.org"))
+
+(setq scripture_url "https://www.churchofjesuschrist.org/study/scriptures/%s/%s/%s?lang=eng")
+(setq bofm_books '(("First Nephi" . "1-ne")
+                   ("Second Nephi" . "2-ne")
+                   ("Jacob" . "jacob")
+                   ("Enos" . "enos")
+                   ("Jarom" . "jarom")
+                   ("Omni" . "omni")
+                   ("Words of Mormon" . "w-of-m")
+                   ("Mosiah" . "mosiah")
+                   ("Alma" . "alma")
+                   ("Helaman" . "hel")
+                   ("Third Nephi" . "3-ne")
+                   ("Fourth Nephi" . "4-ne")
+                   ("Mormon" . "morm")
+                   ("Ether" . "ether")
+                   ("Moroni" . "moro")))
+(setq scripture_books '(("Old Testament" . "ot")
+                        ("New Testament" . "nt")
+                        ("Book of Mormon" . ("Book of Mormon" "BofM" "bofm" bofm_books))
+                        ("Doctrine and Covenants" . "dc-testament")))
+
+(defun my/test ()
+  (interactive)
+  (let* ((volume (cdr (assoc (completing-read "Book: " (mapcar 'car scripture_books)) scripture_books)))
+         (book (assoc (completing-read "Book: " (mapcar 'car (nth 3 volume))) (nth 3 volume)))
+         (chapter (completing-read "Chapter: " nil)))
+    (insert (format "[[%s][%s]]"
+                    (format scripture_url
+                            (cdr (assoc (completing-read "Book: " (mapcar 'car scripture_books)) scripture_books))
+                            (cdr (assoc (completing-read "Book: " (mapcar 'car bofm_books)) bofm_books))
+                            (completing-read "Chapter: " nil))
+                    "Description"))))
+
+                         
+
+;; opens the entire note (not just the heading) when using "C-c /" (org-sparse-tree)
+(push '(tags-tree . local) org-show-context-detail)
 
 (setq org-capture-templates
-      '(("c" "Conference Talk Note" entry (file+headline conference_notes_file "Conference")
-         "* %T %^g\nSession: %^{Year} %^{Session|April|October} %^{Session|Saturday Morning|Saturday Afternoon|Sunday Morning|Sunday Afternoon|Womens|Priesthood}\nSpeaker: %^s\nTitle: %^i\n%?")))
+      '(;("c" "Conference Talk Note" entry (file+headline spiritual_notes_file "Conference")
+         ;"* %T %^g\nSession: %^{Year} | %^{Session|April|October} | %^{Session|Saturday Morning|Saturday Afternoon|Sunday Morning|Sunday Afternoon|Womens|Priesthood}\nSpeaker: %^s\nTitle: %^i\n%?")
+        ("c" "Conference Talk Note" entry (file+headline spiritual_notes_file "Conference")
+         "* %T %^g%^{Year}p%^{Month}p%^{Session}p%^{Speaker}p%^{Title}p\n%?")
+        ;("s" "Scripture Note" entry (file+headline spiritual_notes_file "Scripture")
+                                        ; "* %T %^g\nScripture: %^b | %^{Chapter} | %^{Verses}\n%?")))
+        ("s" "Scripture Note" entry (file+headline spiritual_notes_file "Scripture")
+         "* %T %^g^{Book}p%^{Chapter}p%^{Verse}p\n%?")))
 
 
 (defun aj/org-completing-read-tags (prompt coll pred req initial hist def inh)
-  (if (not (or t (string= "Tags: " prompt)))
-      ;; Not a tags prompt.  Use normal completion by calling
-      ;; `org-completing-read' again without this function in
-      ;; `helm-completing-read-handlers-alist'
-      (let ((helm-completing-read-handlers-alist (rassq-delete-all
-                                                  'aj/org-completing-read-tags
-                                                  helm-completing-read-handlers-alist)))
-        (org-completing-read prompt coll pred req initial hist def inh))
+  ;; (if (not (or t (string= "Tags: " prompt)))
+  ;;     ;; Not a tags prompt.  Use normal completion by calling
+  ;;     ;; `org-completing-read' again without this function in
+  ;;     ;; `helm-completing-read-handlers-alist'
+  ;;     (let ((helm-completing-read-handlers-alist (rassq-delete-all
+  ;;                                                 'aj/org-completing-read-tags
+  ;;                                                 helm-completing-read-handlers-alist)))
+  ;;       (org-completing-read prompt coll pred req initial hist def inh))
     ;; Tags prompt
-    (let* ((initial (and (stringp initial)
-                         (not (string= initial ""))
-                         initial))
-           (curr (when initial
-                   (org-split-string initial ":")))
-           (table (org-uniquify
-                   (mapcar 'car org-last-tags-completion-table)))
-           (table (if curr
-                      ;; Remove current tags from list
-                      (cl-delete-if (lambda (x)
-                                      (member x curr))
-                                    table)
-                    table))
-           (prompt (if initial
-                       (concat "Tags " initial)
-                     prompt)))
-      (concat initial (mapconcat 'identity
-                                 (nreverse (aj/helm-completing-read-multiple
-                                            prompt table pred nil nil hist def
-                                            t "Org tags" "*Helm org tags*" ":"))
-                                 ":")))))
+  (let* ((initial (and (stringp initial)
+                       (not (string= initial ""))
+                       initial))
+         (curr (when initial
+                 (org-split-string initial ":")))
+         (table (org-uniquify
+                 (mapcar 'car org-last-tags-completion-table)))
+         (table (if curr
+                    ;; Remove current tags from list
+                    (cl-delete-if (lambda (x)
+                                    (member x curr))
+                                  table)
+                  table))
+         (prompt (if initial
+                     (concat "Tags " initial)
+                   prompt)))
+    (concat initial (mapconcat 'identity
+                               (nreverse (aj/helm-completing-read-multiple
+                                          prompt table pred nil nil hist def
+                                          t "Org tags" "*Helm org tags*" ":"))
+                               ":"))))
 
 (defun aj/helm-completing-read-multiple (prompt choices
                                                 &optional predicate require-match initial-input hist def
@@ -84,26 +127,32 @@ other parameters."
     res))
 
 
+;; **** I think these are now obsolete because I changed things over to use org properties
+;; **** But they might come in handy if I want to create some sort of custom search thing
+
 ;; change the below to capture other things in the file like
 ;; dates, speakers and talk titles
-(defconst my/org-conference-speaker-re
-  "^[[:blank:]]*Speaker:[[:blank:]]*\\([[:alnum:]\.]+\\( *[[:alnum:]\.]+\\)*\\)[[:blank:]]*$"
-  ;"^\\*+ \\(?:.*[ \t]\\)?\\(:\\([[:alnum:]_@#%:]+\\):\\)[ \t]*$"
-  "Regexp matching speakers in conference notes, stored in match group 1")
+;; (defconst my/org-conference-speaker-re
+;;   "^[[:blank:]]*Speaker:[[:blank:]]*\\([[:alnum:]\.]+\\( *[[:alnum:]\.]+\\)*\\)[[:blank:]]*$"
+;;   "Regexp matching speakers in conference notes, stored in match group 1")
 
-(defconst my/org-conference-talk-title-re
-  "^[[:blank:]]*Title:[[:blank:]]*\\([[:alnum:]\.]+\\( *[[:alnum:]\.]+\\)*\\)[[:blank:]]*$"
-  ;"^\\*+ \\(?:.*[ \t]\\)?\\(:\\([[:alnum:]_@#%:]+\\):\\)[ \t]*$"
-  "Regexp matching talk titles in conference notes, stored in match group 1")
+;; (defconst my/org-conference-talk-title-re
+;;   "^[[:blank:]]*Title:[[:blank:]]*\\([[:alnum:]\.]+\\( *[[:alnum:]\.]+\\)*\\)[[:blank:]]*$"
+;;   "Regexp matching talk titles in conference notes, stored in match group 1")
 
-(defun my/org-get-conference-items (item-re)
-  "Get a list of items from the conference notes"
-  (org-with-point-at 1
-    (let ((conference-items)
-          (sort-fold-case t))      
-      (while (re-search-forward item-re nil t)
-	(push (match-string-no-properties 1) conference-items))
-      (cl-sort conference-items 'string-lessp :key 'downcase))))
+;; (defconst my/org-scripture-book-re
+;; ;  "^[[:blank:]]*Scripture:[[:blank:]]*\\([[:alnum:]\.]+\\( *[[:alnum:]\.]+\\)*\\)[[:blank:]]*$"
+;;   "^[[:blank:]]*Scripture:[[:blank:]]*\\([[:alnum:]\.&]+\\(?: *[[:alnum:]\.&]+\\)*\\)[[:blank:]]*\|.*$"
+;;   "Regexp matching talk titles in conference notes, stored in match group 1")
+;; ;
+;; (defun my/org-get-conference-items (item-re)
+;;   "Get a list of items from the conference notes"
+;;   (org-with-point-at 1
+;;     (let ((conference-items)
+;;           (sort-fold-case t))      
+;;       (while (re-search-forward item-re nil t)
+;; 	(push (match-string-no-properties 1) conference-items))
+;;       (cl-sort conference-items 'string-lessp :key 'downcase))))
 
 
 (defun my/org-capture-fill-template (&optional template initial annotation)
@@ -256,7 +305,7 @@ The template may still contain \"%?\" for cursor positioning."
       (org-clone-local-variables buffer "\\`org-")
       (let (strings)			; Stores interactive answers.
 	(save-excursion
-	  (let ((regexp "%\\^\\(?:{\\([^}]*\\)}\\)?\\([CgGiLpstTuU]\\)?"))
+	  (let ((regexp "%\\^\\(?:{\\([^}]*\\)}\\)?\\([bCgGiLpstTuU]\\)?"))
 	    (while (re-search-forward regexp nil t)
 	      (let* ((items (and (match-end 1)
 				 (save-match-data
@@ -295,15 +344,17 @@ The template may still contain \"%?\" for cursor positioning."
 			 (insert ins)
 			 (unless (eq (char-after) ?:) (insert ":"))
 			 (when (org-at-heading-p) (org-align-tags)))))
-                    ((or "s" "i") ;Conference notes specific stuff.
+                    ((or "s" "i" "b") ;Conference notes specific stuff.
                      (insert
                       (completing-read
                        (cond ((equal key "s") "Speaker: ")
-                             ((equal key "i") "Talk Title: "))
+                             ((equal key "i") "Talk Title: ")
+                             ((equal key "b") "Book: "))
                        (save-excursion
-                         (set-buffer (find-file-noselect conference_notes_file))
+                         (set-buffer (find-file-noselect spiritual_notes_file))
                          (my/org-get-conference-items (cond ((equal key "s") my/org-conference-speaker-re)
-                                                            ((equal key "i") my/org-conference-talk-title-re)))))))
+                                                            ((equal key "i") my/org-conference-talk-title-re)
+                                                            ((equal key "b") my/org-scripture-book-re)))))))
                     
 		    ((or "C" "L")
 		     (let ((insert-fun (if (equal key "C") #'insert
@@ -404,4 +455,75 @@ The template may still contain \"%?\" for cursor positioning."
 ;; override existing function, as mine is overridden when org-capture is run
 ;; and the hook doesn't run until after this function is called
 (advice-add 'org-capture-fill-template :override #'my/org-capture-fill-template)
+
+
+(defun my/org-set-tags-command (&optional arg)
+  "Set the tags for the current visible entry.
+
+When called with `\\[universal-argument]' prefix argument ARG, \
+realign all tags
+in the current buffer.
+
+When called with `\\[universal-argument] \\[universal-argument]' prefix argument, \
+unconditionally do not
+offer the fast tag selection interface.
+
+If a region is active, set tags in the region according to the
+setting of `org-loop-over-headlines-in-active-region'.
+
+This function is for interactive use only;
+in Lisp code use `org-set-tags' instead."
+  (interactive "P")
+  (let ((org-use-fast-tag-selection
+	 (unless (equal '(16) arg) org-use-fast-tag-selection)))
+    (cond
+     ((equal '(4) arg) (org-align-tags t))
+     ((and (org-region-active-p) org-loop-over-headlines-in-active-region)
+      (let (org-loop-over-headlines-in-active-region) ;  hint: infinite recursion.
+	(org-map-entries
+	 #'my/org-set-tags-command;org-set-tags-command
+	 nil
+	 (if (eq org-loop-over-headlines-in-active-region 'start-level)
+	     'region-start-level
+	   'region)
+	 (lambda () (when (org-invisible-p) (org-end-of-subtree nil t))))))
+     (t
+      (save-excursion
+	(org-back-to-heading)
+	(let* ((all-tags (org-get-tags))
+	       (table (setq org-last-tags-completion-table
+			    (org--tag-add-to-alist
+			     (and org-complete-tags-always-offer-all-agenda-tags
+				  (org-global-tags-completion-table
+				   (org-agenda-files)))
+			     (or org-current-tag-alist (org-get-buffer-tags)))))
+	       (current-tags
+		(cl-remove-if (lambda (tag) (get-text-property 0 'inherited tag))
+			      all-tags))
+	       (inherited-tags
+		(cl-remove-if-not (lambda (tag) (get-text-property 0 'inherited tag))
+				  all-tags))
+	       (tags
+		(replace-regexp-in-string
+		 ;; Ignore all forbidden characters in tags.
+		 "[^[:alnum:]_@#%]+" ":"
+		 (if (or (eq t org-use-fast-tag-selection)
+			 (and org-use-fast-tag-selection
+			      (delq nil (mapcar #'cdr table))))
+		     (org-fast-tag-selection
+		      current-tags
+		      inherited-tags
+		      table
+		      (and org-fast-tag-selection-include-todo org-todo-key-alist))
+		   (let ((org-add-colon-after-tag-completion (< 1 (length table))))
+		     (org-trim (aj/org-completing-read-tags ;completing-read
+				"Tags: "
+				#'org-tags-completion-function
+				nil nil (org-make-tag-string current-tags)
+				'org-tags-history nil nil)))))))
+	  (org-set-tags tags)))))))
+
+(add-hook 'org-mode-hook
+           (lambda () (advice-add 'org-set-tags-command :override 'my/org-set-tags-command)))
+
 

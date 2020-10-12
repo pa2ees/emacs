@@ -107,22 +107,18 @@
 (add-hook 'doc-view-mode-hook (lambda () (linum-mode -1)))
 (add-hook 'image-mode-hook (lambda () (linum-mode -1)))
 
-
 ;; ************* ORG MODE STUFF ********************
 (global-set-key (kbd "C-c l") 'org-store-link)
-
+(load-file (concat user-emacs-init-directory "init_org.el"))
 
 ;; ************* DIRED MODE STUFF ******************
 (load-file (concat user-emacs-init-directory "init_dired.el"))
 
-
 ;; ************* PYTHON STUFF **********************
 (load-file (concat user-emacs-init-directory "init_python.el"))
 
-
 ;; ************* PDF STUFF *************************
 ;;(load-file (concat user-emacs-init-directory "init_pdf.el"))
-
 
 ;; ************* PARENS STUFF **********************
 ;; smart-parens were getting kinda annoying
@@ -133,7 +129,6 @@
 ;; highlighting parens is good
 (global-highlight-parentheses-mode)
 
-
 ;; ************* MY FUNCTIONS **********************
 (load-file (concat user-emacs-init-directory "init_my_functions.el"))
 
@@ -141,7 +136,6 @@
 (global-set-key (kbd "<f5>") 'revert-buffer-no-confirm)
 (global-set-key (kbd "C-<f5>") 'revert-all-buffers)
 (global-set-key (kbd "C-x K") 'kill-buffer-other-window-and-close)
-
 
 ;; ************* YASNIPPET STUFF *******************
 (use-package yasnippet
@@ -170,7 +164,6 @@
 
 ;; ************* HELM MODE STUFF *******************
 (load-file (concat user-emacs-init-directory "init_helm.el"))
-(load-file (concat user-emacs-init-directory "init_org.el"))
 
 
 ;; ************* VERILOG STUFF *********************
