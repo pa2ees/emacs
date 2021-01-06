@@ -24,6 +24,17 @@
 ;; installed packages.  Don't delete this line.  If you don't want it,
 ;; just comment it out by adding a semicolon to the start of the line.
 ;; You may delete these explanatory comments.
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" "d8dc153c58354d612b2576fea87fe676a3a5d43bcc71170c62ddde4a1ad9e1fb" default))
+ '(inhibit-startup-screen t)
+ '(package-selected-packages
+   '(helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl jedi smartparens magit highlight-parentheses abyss-theme)))
+
 (package-initialize)
 
 
@@ -45,7 +56,22 @@
 
 ;; check out ibuffer-projectile or ibuffer-vc (ibuffer version control)
 
+;; melpa
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
 
+;; installs packages that are needed, but not installed
+(dolist (package '(use-package))
+  (unless (package-installed-p package)
+    (progn
+      (package-refresh-contents)
+      (package-install package))))
+
+(dolist (package package-selected-packages)
+  (unless (package-installed-p package)
+    (progn
+      (package-refresh-contents)
+      (package-install package))))
 
 (use-package general
   :ensure t)
@@ -56,7 +82,7 @@
 (put 'narrow-to-region 'disabled nil)
 
 ;; make default font height bigger!
-(set-face-attribute 'default nil :height 150)
+;;(set-face-attribute 'default nil :height 150)
 
 ;; programming files basic stuff
 (setq c-default-style "linux")
@@ -74,9 +100,6 @@
 ;; Truncate lines always
 (set-default 'truncate-lines t)
 
-;; melpa
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
 
 ;; Themes
 ;; (load-theme 'abyss t t)
@@ -182,18 +205,6 @@
 ;; ************* LSP-MODE STUFF ********************
 (load-file (concat user-emacs-init-directory "init_lsp-mode.el"))
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   (quote
-    ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" "d8dc153c58354d612b2576fea87fe676a3a5d43bcc71170c62ddde4a1ad9e1fb" default)))
- '(inhibit-startup-screen t)
- '(package-selected-packages
-   (quote
-    (clang-format clang-format+ helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl jedi smartparens magit highlight-parentheses abyss-theme))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
