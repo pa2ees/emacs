@@ -33,37 +33,52 @@
                    ("Mormon" . "morm")
                    ("Ether" . "ether")
                    ("Moroni" . "moro")))
-(setq scripture_books '(("Old Testament" . "ot")
-                        ("New Testament" . "nt")
-                        ("Book of Mormon" . ("Book of Mormon" "BofM" "bofm" bofm_books))
-                        ("Doctrine and Covenants" . "dc-testament")))
+
+;; format is (cons "title of volume" (list "Full name of volume" "Abbrev of volume" "url form of volume" volume_book_list))
+(setq volumes (list (cons "Old Testament" "ot")
+                    (cons "New Testament" "nt")
+                    (cons "Book of Mormon" (list "Book of Mormon" "BofM" "bofm" bofm_books))
+                    (cons "Doctrine and Covenants" "dc-testament")))
 
 (defun my/test ()
   (interactive)
-  (let* ((volume (cdr (assoc (completing-read "Book: " (mapcar 'car scripture_books)) scripture_books)))
+  (let* ((volume (cdr (assoc (completing-read "Book: " (mapcar 'car volumes)) volumes)))
          (book (assoc (completing-read "Book: " (mapcar 'car (nth 3 volume))) (nth 3 volume)))
          (chapter (completing-read "Chapter: " nil)))
     (insert (format "[[%s][%s]]"
                     (format scripture_url
-                            (cdr (assoc (completing-read "Book: " (mapcar 'car scripture_books)) scripture_books))
-                            (cdr (assoc (completing-read "Book: " (mapcar 'car bofm_books)) bofm_books))
-                            (completing-read "Chapter: " nil))
+                            (nth 2 volume) ; get url form of volume; (cdr (assoc (completing-read "Book: " (mapcar 'car scripture_books)) scripture_books))
+                            (cdr book) ; get url vorm of book (cdr (assoc (completing-read "Book: " (mapcar 'car bofm_books)) bofm_books))
+                            chapter) ; get chapter (completing-read "Chapter: " nil))
                     "Description"))))
 
+;;[[https://www.churchofjesuschrist.org/study/scriptures/bofm/2-ne/30?lang=eng][Description]]
                          
 
-;; opens the entire note (not just the heading) when using "C-c /" (org-sparse-tree)
-(push '(tags-tree . local) org-show-context-detail)
 
 (setq org-capture-templates
-      '(;("c" "Conference Talk Note" entry (file+headline spiritual_notes_file "Conference")
-         ;"* %T %^g\nSession: %^{Year} | %^{Session|April|October} | %^{Session|Saturday Morning|Saturday Afternoon|Sunday Morning|Sunday Afternoon|Womens|Priesthood}\nSpeaker: %^s\nTitle: %^i\n%?")
-        ("c" "Conference Talk Note" entry (file+headline spiritual_notes_file "Conference")
+      '(("c" "Conference Talk Note" entry (file+headline spiritual_notes_file "Conference Notes")
          "* %T %^g%^{Year}p%^{Month}p%^{Session}p%^{Speaker}p%^{Title}p\n%?")
-        ;("s" "Scripture Note" entry (file+headline spiritual_notes_file "Scripture")
-                                        ; "* %T %^g\nScripture: %^b | %^{Chapter} | %^{Verses}\n%?")))
-        ("s" "Scripture Note" entry (file+headline spiritual_notes_file "Scripture")
-         "* %T %^g^{Book}p%^{Chapter}p%^{Verse}p\n%?")))
+        ("s" "Scripture Note" entry (file+headline spiritual_notes_file "Scripture Notes")
+         "* %T %^g%^{Book}p%^{Chapter}p%^{Verse}p\n%?")
+        ("e" "Meeting Note" entry (file+headline spiritual_notes_file "Meeting Notes")
+         "* %T %^g\n%?")
+        ("g" "General Note" entry (file+headline spiritual_notes_file "General Notes")
+         "* %T %^g\n%?")
+        ("m" "Mission Templates")
+        ("mp" "Mission Plan" entry (file+olp spiritual_notes_file "Mission" "Plan")
+         "* %^{Topic} %^g\n%?")
+        ("mt" "Mission TODO" entry (file+olp spiritual_notes_file "Mission" "Todo")
+         "* TODO %? %^g")
+        
+        ("mn" "Mission Note Templates")
+        ("mng" "General Mission Note" entry (file+olp spiritual_notes_file "Mission" "Notes" "General")
+         "* %T %^g\n%?")
+        ("mns" "Spiritual Mission Note" entry (file+olp spiritual_notes_file "Mission" "Notes" "Spiritual")
+         "* %T %^g\n%?")
+        ("mnt" "Temporal Mission Note" entry (file+olp spiritual_notes_file "Mission" "Notes" "Temporal")
+         "* %T %^g\n%?")))
+        
 
 
 (defun aj/org-completing-read-tags (prompt coll pred req initial hist def inh)
@@ -524,6 +539,11 @@ in Lisp code use `org-set-tags' instead."
 	  (org-set-tags tags)))))))
 
 (add-hook 'org-mode-hook
-           (lambda () (advice-add 'org-set-tags-command :override 'my/org-set-tags-command)))
+          (progn
+            (lambda () (advice-add 'org-set-tags-command :override 'my/org-set-tags-command))
+            (lambda () (push '(tags-tree . local) org-show-context-detail))))
+
+;; opens the entire note (not just the heading) when using "C-c /" (org-sparse-tree)
+
 
 
