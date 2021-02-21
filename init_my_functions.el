@@ -1,4 +1,15 @@
 
+;; kill-line without saving to kill ring
+(defun kill-line-no-save-to-kill-ring ()
+  (interactive)
+  (progn
+    (kill-line)
+    (when kill-ring
+      (setq kill-ring (cdr kill-ring)))
+    (when kill-ring-yank-pointer
+      (setq kill-ring-yank-pointer kill-ring))))
+
+
 ;; reverting buffers
 (defun revert-all-buffers ()
     "Refreshes all open buffers from their respective files."

@@ -151,6 +151,7 @@
 (load-file (concat user-emacs-init-directory "init_my_functions.el"))
 
 ;; bind keyboard commands to my functions
+(global-set-key (kbd "C-S-k") 'kill-line-no-save-to-kill-ring)
 (global-set-key (kbd "<f5>") 'revert-buffer-no-confirm)
 (global-set-key (kbd "C-<f5>") 'revert-all-buffers)
 (global-set-key (kbd "C-x K") 'kill-buffer-other-window-and-close)
