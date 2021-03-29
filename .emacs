@@ -33,7 +33,7 @@
    '("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" "d8dc153c58354d612b2576fea87fe676a3a5d43bcc71170c62ddde4a1ad9e1fb" default))
  '(inhibit-startup-screen t)
  '(package-selected-packages
-   '(helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl jedi smartparens magit highlight-parentheses abyss-theme)))
+   '(xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl jedi smartparens magit highlight-parentheses abyss-theme)))
 
 (package-initialize)
 
@@ -82,6 +82,7 @@
 (put 'narrow-to-region 'disabled nil)
 
 ;; make default font height bigger!
+(set-face-attribute 'default nil :height 120)
 ;;(set-face-attribute 'default nil :height 150)
 
 ;; programming files basic stuff
@@ -136,6 +137,13 @@
 ;; ************* PDF STUFF *************************
 ;; (load-file (concat user-emacs-init-directory "init_pdf.el"))
 
+;; ************* COLORING STUFF ********************
+;; this helps colorize the compilation terminal
+(require 'xterm-color)
+(setq compilation-environment '("TERM=xterm-256color"))
+(defun my/advice-compilation-filter (f proc string)
+  (funcall f proc (xterm-color-filter string)))
+(advice-add 'compilation-filter :around #'my/advice-compilation-filter)
 
 ;; ************* PARENS STUFF **********************
 ;; smart-parens were getting kinda annoying
