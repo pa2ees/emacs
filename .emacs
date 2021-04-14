@@ -164,6 +164,12 @@
 (global-set-key (kbd "C-<f5>") 'revert-all-buffers)
 (global-set-key (kbd "C-x K") 'kill-buffer-other-window-and-close)
 (global-set-key (kbd "M-f") 'forward-to-word)
+(global-set-key (kbd "M-F") 'forward-symbol)
+
+;; Run this for each mode you want to use the hook.
+(add-hook 'c-mode-hook (lambda () (clang-format-save-hook-for-this-buffer)))
+(add-hook 'c++-mode-hook (lambda () (clang-format-save-hook-for-this-buffer)))
+
 
 (setq-default tab-width 4)
 

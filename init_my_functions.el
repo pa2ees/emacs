@@ -1,3 +1,17 @@
+(defun clang-format-save-hook-for-this-buffer ()
+  "Create a buffer local save hook."
+  (add-hook 'before-save-hook
+            (lambda ()
+              (progn
+                (when (locate-dominating-file "." ".clang-format")
+                  (message "Running Clang-Format on buffer before save")
+                  (clang-format-buffer))
+                ;; Continue to save.
+                nil))
+            nil
+            ;; Buffer local hook.
+            t))
+
 
 ;; kill-line without saving to kill ring
 (defun kill-line-no-save-to-kill-ring ()
