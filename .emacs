@@ -33,7 +33,7 @@
    '("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" "d8dc153c58354d612b2576fea87fe676a3a5d43bcc71170c62ddde4a1ad9e1fb" default))
  '(inhibit-startup-screen t)
  '(package-selected-packages
-   '(xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl jedi smartparens magit highlight-parentheses abyss-theme)))
+   '(cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl jedi smartparens magit highlight-parentheses abyss-theme)))
 
 (package-initialize)
 
@@ -74,6 +74,9 @@
       (package-install package))))
 
 (use-package general
+  :ensure t)
+
+(use-package neotree
   :ensure t)
 
 
@@ -184,6 +187,20 @@
 
 ;; this got annoying, better to enable when needed? or in the mode needed?
 ;; (yas-global-mode 1)
+
+
+;; ************* C++ STUFF *************************
+
+;; TODO: get code folding working well 
+;; (defun toggle-fold-current-defun ()
+;;   (interactive)
+;;   (progn
+;;     (beginning-of-defun)
+;;     (move-end-of-line)
+;;     (hs-toggle-hiding)))
+
+;; key mapping: C-c c(ode) f(old) t(oggle)
+;; (global-set-key (kbd "C-c c f t") (lambda() (interactive) (toggle-fold-current-defun)))
 
 
 ;; ************* MAGIT STUFF ***********************

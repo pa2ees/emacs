@@ -89,6 +89,7 @@
   (dired-sort-set-mode-line))
 
 (defun dired-switch-toggle (arg)
+  "Toggles dired switch, if it exists"
   (let ((switch-exists (string-match-p (dired-get-match-string-for-switch arg) dired-actual-switches))
         case-fold-search)
     (if switch-exists
@@ -98,12 +99,15 @@
 
 
 (defun dired-do-sort (arg)
+  "Adds sorting to dired buffer based on value of arg"
   (dired-add-switch arg))
   
 (defun dired-remove-sort (arg)
+  "Removes sorting in dired buffer based on value of arg"
   (dired-remove-switch arg))
 
 (defun dired-sort-file-extension ()
+  "Sort dired buffer by file extension"
   (interactive)
   (dired-remove-sort-all)
   (dired-do-sort "X")
@@ -111,6 +115,7 @@
   (message "Sorting by File Extension"))
 
 (defun dired-sort-filename ()
+  "Sort dired buffer by filename"
   (interactive)
   (dired-remove-sort-all)
   (dired-sort-set-mode-line)
@@ -118,6 +123,7 @@
   (message "Sorting by Filename"))
 
 (defun dired-sort-directory-order ()
+  "Sort dired buffer by directory order"
   (interactive)
   (dired-remove-sort-all)
   (dired-do-sort "U")
@@ -125,6 +131,7 @@
   (message "Sorting by Directory Order"))
 
 (defun dired-sort-size ()
+  "Sort dired buffer by file size"
   (interactive)
   (dired-remove-sort-all)
   (dired-do-sort "S")
@@ -132,6 +139,7 @@
   (message "Sorting by File Size"))
 
 (defun dired-sort-time ()
+  "Sort dired buffer by timestamp"
   (interactive)
   (dired-remove-sort-all)
   (dired-do-sort "t")
@@ -139,24 +147,28 @@
   (message "Sorting by File Modification Date/Time"))
 
 (defun dired-sort-reversed-toggle ()
+  "Cause all sorting to be reversed in dired buffer"
   (dired-switch-toggle "r")
   (dired-sort-set-mode-line)
   (revert-buffer)
   (message "Toggled Reverse Sorting"))
 
 (defun dired-reset-switches ()
+  "Resets all dired sorting and filtering switches to default in dired buffer"
   (setq dired-actual-switches "-Blh --group-directories-first")
   (dired-sort-set-mode-line)
   (revert-buffer)
   (message "Reset dired switches"))
 
 (defun dired-show-all-toggle ()
+  "Shows all files (removes all filters) in dired buffer"
   (dired-remove-switch "B")
   (dired-remove-switch "A")
   (dired-switch-toggle "a")
   (revert-buffer))
 
 (defun dired-human-readable-toggle ()
+  "Toggle human-readability in dired buffer"
   (dired-switch-toggle "h")
   (revert-buffer))
 
