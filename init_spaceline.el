@@ -35,16 +35,38 @@
     (spaceline-toggle-buffer-id-on)
     (spaceline-emacs-theme 'date 'time 'datetime)))
 
+(defun get-project-name ()
+  "Gets the name of the project. If TRAMP, don't use projectile"
+  (if (file-remote-p default-directory)
+      "Remote"
+    (if
+	(and
+	 (buffer-file-name) (projectile-project-root))
+	(projectile-project-root))))
+
+
+(spaceline-define-segment new-projectile-root
+  "Prevents slowdowns when using TRAMP"
+  (if (file-remote-p default-directory)
+      "Remote"
+    (when (fboundp 'projectile-project-name)
+      (let ((project-name (projectile-project-name)))
+	(unless (or (string= project-name "-")
+                    (string= project-name (buffer-name)))
+          project-name)))))
+  
 ;; Create new segment with filename as large font
 (spaceline-define-segment new-buffer-id
   "Name of buffer."
   (s-trim (spaceline--string-trim-from-center
            (propertize
-            (if
-                (and
-                 (buffer-file-name) (projectile-project-root))
-                (file-relative-name buffer-file-name (projectile-project-root))
-              (powerline-buffer-id 'default-face))
+            (if (file-remote-p default-directory)
+		(powerline-buffer-id 'default-face)
+	      (if
+                  (and
+                   (buffer-file-name) (projectile-project-root))
+                  (file-relative-name buffer-file-name (projectile-project-root))
+		(powerline-buffer-id 'default-face)))
               'face 'large-font)
             spaceline-buffer-id-max-length)))
 
@@ -58,9 +80,9 @@
      :priority 100)
     (anzu :priority 95)
     auto-compile
-    ((buffer-modified buffer-size remote-host)
+    ((buffer-modified buffer-size)
      :priority 98)
-    ((projectile-root new-buffer-id)
+    ((new-projectile-root new-buffer-id)
      :priority 97
      :separator " | ")
     (major-mode :priority 79)
