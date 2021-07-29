@@ -44,12 +44,6 @@
   ;; including company-jedi (already using jedi) ??
   ;; use irony with this?
   ;; works with helm!
-;; ggtags http://www.mycpu.org/emacs-rtags-helm/ uses gnu-global
-;; rtags completion tags
-  ;;can use helm
-  ;; needs libclang?
-;; irony completion tags
-  ;; needs libclang?
 ;; elpy for python stuff?
 
 ;; https://trivialfis.github.io/emacs/2017/08/02/C-C++-Development-Environment-on-Emacs.html
@@ -169,9 +163,11 @@
 (global-set-key (kbd "M-f") 'forward-to-word)
 (global-set-key (kbd "M-F") 'forward-symbol)
 
+;; ************** CLANG-FORMAT *********************
 ;; Run this for each mode you want to use the hook.
-(add-hook 'c-mode-hook (lambda () (clang-format-save-hook-for-this-buffer)))
-(add-hook 'c++-mode-hook (lambda () (clang-format-save-hook-for-this-buffer)))
+(add-hook 'c-initialization-hook (lambda () (clang-format-save-hook-for-this-buffer)))
+;; (add-hook 'c-mode-hook (lambda () (clang-format-save-hook-for-this-buffer)))
+;; (add-hook 'c++-mode-hook (lambda () (clang-format-save-hook-for-this-buffer)))
 
 
 (setq-default tab-width 4)
@@ -191,16 +187,34 @@
 
 ;; ************* C++ STUFF *************************
 
-;; TODO: get code folding working well 
-;; (defun toggle-fold-current-defun ()
-;;   (interactive)
-;;   (progn
-;;     (beginning-of-defun)
-;;     (move-end-of-line)
-;;     (hs-toggle-hiding)))
+(defun toggle-folding ()
+  (interactive)
+  (progn
+    (beginning-of-line)
+    (c-end-of-defun)
+    (c-beginning-of-defun)
+    (c-syntactic-re-search-forward "{" nil 'eob)
+    (backward-char)
+    (hs-toggle-hiding)))
 
-;; key mapping: C-c c(ode) f(old) t(oggle)
-;; (global-set-key (kbd "C-c c f t") (lambda() (interactive) (toggle-fold-current-defun)))
+(defun beginning-of-next-defun ()
+  (interactive)
+  (c-beginning-of-defun -1))
+
+(add-hook 'c-initialization-hook
+          (lambda ()
+            (local-set-key (kbd "C-M-p") 'c-beginning-of-defun)
+            (local-set-key (kbd "C-M-n") 'beginning-of-next-defun)
+            (local-set-key (kbd "C-M-N") 'c-end-of-defun)
+            (local-set-key (kbd "C-;") 'toggle-folding)
+            (local-set-key (kbd "C-c f t") 'toggle-folding) ;; f(old) t(oggle)
+            (local-set-key (kbd "C-c f s") 'hs-show-all) ;; f(old) s(how all)
+            (local-set-key (kbd "C-c f h") 'hs-hide-all) ;; f(old) h(ide all)
+            ))
+
+(add-hook 'c-mode-common-hook
+          (lambda ()
+            (hs-minor-mode)))
 
 
 ;; ************* MAGIT STUFF ***********************
