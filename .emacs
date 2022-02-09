@@ -128,6 +128,12 @@
 (add-hook 'image-mode-hook (lambda () (linum-mode -1)))
 
 
+;; ************* CONFLUENCE STUFF ******************
+;; unfortunately this is not working
+;; (add-to-list 'load-path (concat user-emacs-init-directory "confluence/confluence-el"))
+;; (require 'confluence)
+;; (setq confluence-url "https://confluence.imsar.us")
+
 ;; ************* ORG MODE STUFF ********************
 (global-set-key (kbd "C-c l") 'org-store-link)
 
@@ -137,7 +143,9 @@
 
 
 ;; ************* PYTHON STUFF **********************
-(load-file (concat user-emacs-init-directory "init_python.el"))
+;; something is wrong in the init_python.el file that slows down emacs
+;; when writing python
+;; (load-file (concat user-emacs-init-directory "init_python.el"))
 
 
 ;; ************* PDF STUFF *************************
