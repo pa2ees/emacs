@@ -113,6 +113,6 @@
     ;;  :priority 96)
                                         ;(global :when active)
     (line-column :priority 90)
-    (datetime :priority 97)
+    (datetime :priority 5)
     (buffer-position :priority 99)
     (hud :priority 99)))
