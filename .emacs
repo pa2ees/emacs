@@ -32,8 +32,26 @@
  '(custom-safe-themes
    '("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" "d8dc153c58354d612b2576fea87fe676a3a5d43bcc71170c62ddde4a1ad9e1fb" default))
  '(inhibit-startup-screen t)
+ '(logview-additional-level-mappings
+   '(("imsar_levels"
+      (error "error")
+      (warning "warning")
+      (information "info")
+      (debug "debug")
+      (trace "trace")
+      (aliases))))
+ '(logview-additional-submodes
+   '(("imsar"
+      (format . "[TIMESTAMP][LEVEL][NAME]")
+      (levels . "imsar_levels")
+      (timestamp "imsar_timestamp")
+      (aliases))))
+ '(logview-additional-timestamp-formats
+   '(("imsar_timestamp"
+      (java-pattern . "HH:mm:ss.SSS")
+      (datetime-options))))
  '(package-selected-packages
-   '(cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl jedi smartparens magit highlight-parentheses abyss-theme)))
+   '(graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl jedi smartparens magit highlight-parentheses abyss-theme)))
 
 (package-initialize)
 
@@ -86,6 +104,9 @@
 ;; misc setup things
 (setq inhibit-startup-screen t)
 (put 'narrow-to-region 'disabled nil)
+;; prevent ffap (find file at point) from pinging weird websites if the thing at point
+;; looks something like a web address. ie test.my (looks for some server in Malaysia)???
+(setq ffap-machine-p-known 'reject)
 
 ;; make default font height bigger!
 (set-face-attribute 'default nil :height 120)
