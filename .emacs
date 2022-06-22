@@ -260,6 +260,7 @@
 (global-set-key (kbd "C-x g") 'magit-status)
 (setenv "GIT_ASKPASS" "git-gui--askpass")
 (setenv "SSH_ASKPASS" "git-gui--askpass")
+(load-file (concat user-emacs-init-directory "init_magit.el"))
 
 
 ;; ************* IBUFF STUFF ***********************
