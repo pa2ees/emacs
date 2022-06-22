@@ -166,7 +166,7 @@
 ;; ************* PYTHON STUFF **********************
 ;; something is wrong in the init_python.el file that slows down emacs
 ;; when writing python
-;; (load-file (concat user-emacs-init-directory "init_python.el"))
+(load-file (concat user-emacs-init-directory "init_python.el"))
 
 
 ;; ************* PDF STUFF *************************

@@ -2,6 +2,11 @@
 (setq python-shell-interpreter "ipython"
       python-shell-interpreter-args "-i --simple-prompt")
 
+;; (add-hook 'inferior-python-mode-hook
+;;         (lambda ()
+;;           (setq company-mode nil)))
+
+
 ;; ;; jedi - python completion
 ;; (add-hook 'python-mode-hook 'jedi:setup)
 ;; ;; (setq jedi:complete-on-dot t)
@@ -49,17 +54,17 @@
 ;;(if (version< emacs-version "26.3")
 ;;    (progn
       
-      ;; jedi - python completion
-      (add-hook 'python-mode-hook 'jedi:setup)
-      ;; (setq jedi:complete-on-dot t)
+      ;; ;; jedi - python completion
+      ;; (add-hook 'python-mode-hook 'jedi:setup)
+      ;; ;; (setq jedi:complete-on-dot t)
       
-      ;; (setq python-shell-interpreter "ipython")
+      ;; ;; (setq python-shell-interpreter "ipython")
       
-      (add-hook 'python-mode-hook
-                (lambda () (progn
-                             (jedi:setup)
-                             (setq jedi:complete-on-dot t)
-                             (setq python-indent-offset 4))))
+      ;; (add-hook 'python-mode-hook
+      ;;           (lambda () (progn
+      ;;                        (jedi:setup)
+      ;;                        (setq jedi:complete-on-dot t)
+      ;;                        (setq python-indent-offset 4))))
 ;;    (progn
       ;; (use-package company
       ;;   :ensure t
@@ -90,3 +95,9 @@
       ;;   :ensure t
       ;;   :config
       ;;   (elpy-enable))))
+
+(use-package elpy
+  :ensure t
+  :defer t
+  :init
+  (advice-add 'python-mode :before 'elpy-enable))
