@@ -1,6 +1,6 @@
 (defun evz/git-message-add-jira-ticket()
   (let* ((branch-name (magit-get-current-branch))
-         (pat "^\\(NES-[0-9]+\\)")
+         (pat "^\\(\\(NES\\|NANO\\)-[0-9]+\\)")
          (pos (string-match pat branch-name)))
     (if pos
         (save-excursion
