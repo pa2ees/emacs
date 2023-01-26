@@ -118,8 +118,10 @@
 (setq-default indent-tabs-mode nil)
 (setq default-tab-width 4)
 
-
 ;; (setq scroll-step 1)
+;; (setq hscroll-step 1) ;; set horizontal scroll step to 1
+(setq auto-hscroll-mode 'current-line)
+
 (setq scroll-margin 4) ;; sets how far away from top or bottom we start to scroll
 (setq scroll-conservatively 1) ;; seems to work ok
 (menu-bar-mode -1)
@@ -268,7 +270,7 @@
 
 
 ;; ************* HELM MODE STUFF *******************
-(require 'helm-config)
+;; (require 'helm-config)
 ;;(require 'swiper-helm)
 
 (helm-mode 1)
