@@ -1,19 +1,23 @@
 (defun evz/git-message-add-jira-ticket()
   (let* ((branch-name (magit-get-current-branch))
-         (pat "^\\(\\(NES\\|NANO\\)-[0-9]+\\)")
-         (pos (string-match pat branch-name)))
-    (if pos
+         (rem-url (magit-get (concat "remote." (magit-get-current-remote) ".url")))
+         (nes-pat "^\\(\\(NES\\|NANO\\)-[0-9]+\\)")
+         (rem-pat "\\(.*@gitlabee.imsar.us\\)")
+         (rem-pos (string-match rem-pat rem-url))
+         (nes-pos (string-match nes-pat branch-name)))
+    (if rem-pos
         (save-excursion
           (save-match-data
-            (if (search-forward "billed to" nil t)
+            (if (search-forward "#" nil t)
                 (beginning-of-line)
-              (if (search-forward "#" nil t)
-                  (beginning-of-line)
-                (insert "\n\n"))))
-            
-          (open-line 1)
-          (insert "JIRA Ticket: ")
-          (insert (match-string 1 branch-name))))))
+              (insert "\n\n")))
+          (if nes-pos
+              (progn
+                (open-line 1)
+                (insert "JIRA Ticket: ")
+                (insert (match-string 1 branch-name))
+                (insert "\n")))
+          (insert-file-contents "~/.magit_message")))))
       
 (add-hook 'git-commit-setup-hook #'evz/git-message-add-jira-ticket)
 
