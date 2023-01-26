@@ -53,6 +53,7 @@
               (ibuffer-switch-to-saved-filter-groups "default")
               (push "hidden" ibuffer-hidden-filter-groups)
               (push "helm" ibuffer-hidden-filter-groups)
+              (push "magit" ibuffer-hidden-filter-groups)
               (message "fart"))))
 
 (setq ibuffer-show-empty-filter-groups nil)
