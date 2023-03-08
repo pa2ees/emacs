@@ -148,6 +148,7 @@
 
 (defun dired-sort-reversed-toggle ()
   "Cause all sorting to be reversed in dired buffer"
+  (interactive)
   (dired-switch-toggle "r")
   (dired-sort-set-mode-line)
   (revert-buffer)
@@ -155,6 +156,7 @@
 
 (defun dired-reset-switches ()
   "Resets all dired sorting and filtering switches to default in dired buffer"
+  (interactive)
   (setq dired-actual-switches "-Blh --group-directories-first")
   (dired-sort-set-mode-line)
   (revert-buffer)
@@ -162,6 +164,7 @@
 
 (defun dired-show-all-toggle ()
   "Shows all files (removes all filters) in dired buffer"
+  (interactive)
   (dired-remove-switch "B")
   (dired-remove-switch "A")
   (dired-switch-toggle "a")
@@ -169,41 +172,44 @@
 
 (defun dired-human-readable-toggle ()
   "Toggle human-readability in dired buffer"
+  (interactive)
   (dired-switch-toggle "h")
   (revert-buffer))
 
 (defun dired-owner-toggle ()
+  "Toggle owner column"
+  (interactive)
   (dired-switch-toggle "g")
   (revert-buffer))
 
 (defun dired-group-toggle ()
+  "Toggle group column"
+  (interactive)
   (dired-switch-toggle "G")
   (revert-buffer))
 
 (defun dired-backup-toggle ()
+  "Toggle showing backup files (ie *~)"
+  (interactive)
   (dired-switch-toggle "B")
   (revert-buffer))
 
-  
 (add-hook 'dired-mode-hook (lambda ()
                              (dired-reset-switches)
-                             (local-set-key (kbd "M-s s x") (lambda() (interactive) (dired-sort-file-extension)))
-                             (local-set-key (kbd "M-s s D") (lambda() (interactive) (dired-sort-directory-order)))
-                             (local-set-key (kbd "M-s s f") (lambda() (interactive) (dired-sort-filename)))
-                             (local-set-key (kbd "M-s s n") (lambda() (interactive) (dired-sort-filename)))
-                             (local-set-key (kbd "M-s s s") (lambda() (interactive) (dired-sort-size)))
-                             (local-set-key (kbd "M-s s t") (lambda() (interactive) (dired-sort-time)))
-                             (local-set-key (kbd "M-s s d") (lambda() (interactive) (dired-sort-time)))
-                             (local-set-key (kbd "M-s s r") (lambda() (interactive) (dired-sort-reversed-toggle)))
-                             (local-set-key (kbd "M-s r") (lambda() (interactive) (dired-reset-switches)))
-                             (local-set-key (kbd "M-s a") (lambda() (interactive) (dired-show-all-toggle)))
-                             (local-set-key (kbd "M-s H") (lambda() (interactive) (dired-human-readable-toggle)))
-                             (local-set-key (kbd "M-s g") (lambda() (interactive) (dired-owner-toggle)))
-                             (local-set-key (kbd "M-s G") (lambda() (interactive) (dired-group-toggle)))
-                             (local-set-key (kbd "M-s b") (lambda() (interactive) (dired-backup-toggle)))
+                             (local-set-key (kbd "M-s s x") 'dired-sort-file-extension)
+                             (local-set-key (kbd "M-s s D") 'dired-sort-directory-order)
+                             (local-set-key (kbd "M-s s f") 'dired-sort-filename)
+                             (local-set-key (kbd "M-s s n") 'dired-sort-filename)
+                             (local-set-key (kbd "M-s s s") 'dired-sort-size)
+                             (local-set-key (kbd "M-s s t") 'dired-sort-time)
+                             (local-set-key (kbd "M-s s d") 'dired-sort-time)
+                             (local-set-key (kbd "M-s s r") 'dired-sort-reversed-toggle)
+                             (local-set-key (kbd "M-s r") 'dired-reset-switches)
+                             (local-set-key (kbd "M-s a") 'dired-show-all-toggle)
+                             (local-set-key (kbd "M-s H") 'dired-human-readable-toggle)
+                             (local-set-key (kbd "M-s g") 'dired-owner-toggle)
+                             (local-set-key (kbd "M-s G") 'dired-group-toggle)
+                             (local-set-key (kbd "M-s b") 'dired-backup-toggle)
                              
                              (linum-mode -1)))
 
-
-;; (add-hook 'diredfl-mode-hook (lambda ()
-;;                                (
