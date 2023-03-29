@@ -51,7 +51,7 @@
       (java-pattern . "HH:mm:ss.SSS")
       (datetime-options))))
  '(package-selected-packages
-   '(vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl jedi smartparens magit highlight-parentheses abyss-theme)))
+   '(lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl jedi smartparens magit highlight-parentheses abyss-theme)))
 
 (package-initialize)
 
@@ -268,14 +268,22 @@
 ;; ************* IBUFF STUFF ***********************
 (load-file (concat user-emacs-init-directory "init_ibuffer.el"))
 
-
 ;; ************* HELM MODE STUFF *******************
 ;; (require 'helm-config)
-;;(require 'swiper-helm)
+(require 'swiper-helm)
+
+
+;; helm stuff to try
+;; helm-gitlab
+;; helm-rg helm ripgrep
+
+(setq helm-display-function 'helm-display-buffer-in-own-frame
+        helm-display-buffer-reuse-frame t
+        helm-use-undecorated-frame-option t)
 
 (helm-mode 1)
 
-;;(global-set-key (kbd "C-s") 'swiper-helm)
+(global-set-key (kbd "C-s") 'swiper-helm)
 
 (global-set-key (kbd "M-x") 'helm-M-x)
 (global-set-key (kbd "C-x C-f") 'helm-find-files)
