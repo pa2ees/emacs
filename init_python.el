@@ -96,6 +96,7 @@
       ;;   :config
       ;;   (elpy-enable))))
 
+;; NOTE: if python gives "error in process sentinel..." run M-x elpy-rpc-reinstall-virtualenv
 (use-package elpy
   :ensure t
   :defer t
