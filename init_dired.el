@@ -194,22 +194,46 @@
   (dired-switch-toggle "B")
   (revert-buffer))
 
+(defvar my-dired-mode-map 
+  (let ((map (make-sparse-keymap)))
+    ;; sort keybindings
+    (define-key map (kbd "M-s s x") 'dired-sort-file-extension)
+    (define-key map (kbd "M-s s D") 'dired-sort-directory-order)
+    (define-key map (kbd "M-s s f") 'dired-sort-filename)
+    (define-key map (kbd "M-s s n") 'dired-sort-filename)
+    (define-key map (kbd "M-s s s") 'dired-sort-size)
+    (define-key map (kbd "M-s s t") 'dired-sort-time)
+    (define-key map (kbd "M-s s d") 'dired-sort-time)
+    (define-key map (kbd "M-s s r") 'dired-sort-reversed-toggle)
+    (define-key map (kbd "M-s r") 'dired-reset-switches)
+    (define-key map (kbd "M-s a") 'dired-show-all-toggle)
+    (define-key map (kbd "M-s H") 'dired-human-readable-toggle)
+    (define-key map (kbd "M-s g") 'dired-owner-toggle)
+    (define-key map (kbd "M-s G") 'dired-group-toggle)
+    (define-key map (kbd "M-s b") 'dired-backup-toggle)
+    
+    ;; filter keybindings
+    (define-key map (kbd "f") 'dired-narrow)
+    
+    ;; subtree keybindings
+    (define-key map (kbd "s s") 'dired-subtree-toggle)
+    (define-key map (kbd "s i") 'dired-subtree-insert)
+    (define-key map (kbd "s k") 'dired-subtree-remove)
+    (define-key map (kbd "s p") 'dired-subtree-up)
+    (define-key map (kbd "s n") 'dired-subtree-down)
+    (define-key map (kbd "s c") 'dired-subtree-cycle)
+    (define-key map (kbd "s t") 'dired-subtree-toggle)
+    (define-key map (kbd "s M-p") 'dired-subtree-beginning)
+    (define-key map (kbd "s M-n") 'dired-subtree-end)
+    map)
+  "Custom keymap for Dired mode.")
+
 (add-hook 'dired-mode-hook (lambda ()
                              (dired-reset-switches)
-                             (local-set-key (kbd "M-s s x") 'dired-sort-file-extension)
-                             (local-set-key (kbd "M-s s D") 'dired-sort-directory-order)
-                             (local-set-key (kbd "M-s s f") 'dired-sort-filename)
-                             (local-set-key (kbd "M-s s n") 'dired-sort-filename)
-                             (local-set-key (kbd "M-s s s") 'dired-sort-size)
-                             (local-set-key (kbd "M-s s t") 'dired-sort-time)
-                             (local-set-key (kbd "M-s s d") 'dired-sort-time)
-                             (local-set-key (kbd "M-s s r") 'dired-sort-reversed-toggle)
-                             (local-set-key (kbd "M-s r") 'dired-reset-switches)
-                             (local-set-key (kbd "M-s a") 'dired-show-all-toggle)
-                             (local-set-key (kbd "M-s H") 'dired-human-readable-toggle)
-                             (local-set-key (kbd "M-s g") 'dired-owner-toggle)
-                             (local-set-key (kbd "M-s G") 'dired-group-toggle)
-                             (local-set-key (kbd "M-s b") 'dired-backup-toggle)
-                             
+                             ;; add dired-mode-map as parent to keep existing key bindings
+                             (set-keymap-parent my-dired-mode-map dired-mode-map)
+
+                             (use-local-map my-dired-mode-map)
+
                              (linum-mode -1)))
 
