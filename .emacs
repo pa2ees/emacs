@@ -203,6 +203,7 @@
 (global-set-key (kbd "M-f") 'forward-to-word)
 (global-set-key (kbd "M-F") 'forward-symbol)
 (global-set-key (kbd "s-n") 'set-frame-name)
+(global-set-key (kbd "M-Q") 'unfill-paragraph)
 
 ;; ************** CLANG-FORMAT *********************
 ;; Run this for each mode you want to use the hook.
