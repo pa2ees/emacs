@@ -235,5 +235,5 @@
 
                              (use-local-map my-dired-mode-map)
 
-                             (linum-mode -1)))
-
+                             ;; (linum-mode -1)))
+                             (display-line-numbers-mode -1)))

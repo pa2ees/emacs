@@ -51,7 +51,12 @@
       (java-pattern . "HH:mm:ss.SSS")
       (datetime-options))))
  '(package-selected-packages
-   '(dired-narrow gptel lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl jedi smartparens magit highlight-parentheses abyss-theme)))
+   '(dired-narrow gptel lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl jedi smartparens magit highlight-parentheses abyss-theme))
+ '(safe-local-variable-values
+   '((projectile-project-compilation-dir . "")
+     (projectile-project-compilation-cmd . "./build.sh phoenix beorn && scp build/armv7l/ubuntu_1604/release/beorn/bin/beorn my_stack:/root/esa_2d_testing/")
+     (projectile-project-compilation-dir . "../../")
+     (projectile-project-compilation-cmd . "./build.sh phoenix beorn"))))
 
 (package-initialize)
 
@@ -143,12 +148,15 @@
 
 
 ;; ************* LINUM STUFF ***********************
-(global-linum-mode)
+(global-display-line-numbers-mode 1)
+;; (global-linum-mode 1)
 ;; (setq linum-format "%d ")
 
 ;; image mode and doc view mode don't like linum mode
-(add-hook 'doc-view-mode-hook (lambda () (linum-mode -1)))
-(add-hook 'image-mode-hook (lambda () (linum-mode -1)))
+;; (add-hook 'doc-view-mode-hook (lambda () (linum-mode -1)))
+;; (add-hook 'image-mode-hook (lambda () (linum-mode -1)))
+(add-hook 'doc-view-mode-hook (lambda () (display-line-numbers-mode -1)))
+(add-hook 'image-mode-hook (lambda () (display-line-numbers-mode -1)))
 
 
 ;; ************* CONFLUENCE STUFF ******************
