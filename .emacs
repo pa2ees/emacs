@@ -53,10 +53,10 @@
  '(package-selected-packages
    '(dired-narrow gptel lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl jedi smartparens magit highlight-parentheses abyss-theme))
  '(safe-local-variable-values
-   '((projectile-project-compilation-dir . "")
-     (projectile-project-compilation-dir . "../../")
-     (projectile-project-compilation-cmd . "./build.sh python-bindings")
+   '((projectile-project-compilation-cmd . "./build.sh python-bindings")
+     (projectile-project-compilation-dir . "")
      (projectile-project-compilation-cmd . "./build.sh phoenix beorn && scp build/armv7l/ubuntu_1604/release/beorn/bin/beorn my_stack:/root/esa_2d_testing/")
+     (projectile-project-compilation-dir . "../../")
      (projectile-project-compilation-cmd . "./build.sh phoenix beorn"))))
 
 (package-initialize)
@@ -108,6 +108,7 @@
 
 
 ;; misc setup things
+(setq frame-resize-pixelwise t)
 (setq inhibit-startup-screen t)
 (put 'narrow-to-region 'disabled nil)
 ;; prevent ffap (find file at point) from pinging weird websites if the thing at point
