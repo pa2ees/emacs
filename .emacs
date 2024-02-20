@@ -124,6 +124,7 @@
 (setq-default c-basic-offset 4)
 (setq-default indent-tabs-mode nil)
 (setq default-tab-width 4)
+(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 
 ;; (setq scroll-step 1)
 ;; (setq hscroll-step 1) ;; set horizontal scroll step to 1
@@ -288,9 +289,9 @@
 ;; helm-gitlab
 ;; helm-rg helm ripgrep
 
-(setq helm-display-function 'helm-display-buffer-in-own-frame
-        helm-display-buffer-reuse-frame t
-        helm-use-undecorated-frame-option t)
+;; (setq helm-display-function 'helm-display-buffer-in-own-frame
+;;         helm-display-buffer-reuse-frame t
+;;         helm-use-undecorated-frame-option t)
 
 (helm-mode 1)
 
