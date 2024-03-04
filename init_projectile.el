@@ -6,6 +6,16 @@
 
 (helm-projectile-on)
 
+;; (load-file (concat user-emacs-init-directory "project_comphist.el"))
+
+;; This is temporary until project-comphist is available on MELPA
+(push "~/projects/projectile-comphist/" load-path)
+
+(require 'projectile-comphist)
+
+(advice-add 'projectile-compile-project :override 'projectile-comphist-compile)
+
+
 
 ;; (defun evz/projectile-compilation-command (compile-dir)
 ;;   "echo hello")

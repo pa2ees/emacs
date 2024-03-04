@@ -51,13 +51,7 @@
       (java-pattern . "HH:mm:ss.SSS")
       (datetime-options))))
  '(package-selected-packages
-   '(dired-narrow gptel lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp elpy general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl jedi smartparens magit highlight-parentheses abyss-theme))
- '(safe-local-variable-values
-   '((projectile-project-compilation-cmd . "./build.sh python-bindings")
-     (projectile-project-compilation-dir . "")
-     (projectile-project-compilation-cmd . "./build.sh phoenix beorn && scp build/armv7l/ubuntu_1604/release/beorn/bin/beorn my_stack:/root/esa_2d_testing/")
-     (projectile-project-compilation-dir . "../../")
-     (projectile-project-compilation-cmd . "./build.sh phoenix beorn"))))
+   '(persist project-persist jedi elpy dired-narrow gptel lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl smartparens magit highlight-parentheses abyss-theme)))
 
 (package-initialize)
 
@@ -111,6 +105,19 @@
 (setq frame-resize-pixelwise t)
 (setq inhibit-startup-screen t)
 (put 'narrow-to-region 'disabled nil)
+
+;; Control where autosaves go
+(setq
+ backup-by-copying t      ; don't clobber symlinks
+ tramp-auto-save-directory "~/.emacs_saves/tramp/"
+ tramp-allow-unsafe-temporary-files t
+ backup-directory-alist
+ '(("." . "~/.emacs_saves/"))    ; don't litter my fs tree
+ delete-old-versions t
+ kept-new-versions 6
+ kept-old-versions 2
+ version-control t)       ; use versioned backups
+
 ;; prevent ffap (find file at point) from pinging weird websites if the thing at point
 ;; looks something like a web address. ie test.my (looks for some server in Malaysia)???
 (setq ffap-machine-p-known 'reject)
