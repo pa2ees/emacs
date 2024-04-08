@@ -54,6 +54,7 @@
               (push "hidden" ibuffer-hidden-filter-groups)
               (push "helm" ibuffer-hidden-filter-groups)
               (push "magit" ibuffer-hidden-filter-groups)
-              (message "fart"))))
+              (setq ibuffer-current-format 1)
+              (ibuffer-update-format))))
 
 (setq ibuffer-show-empty-filter-groups nil)
