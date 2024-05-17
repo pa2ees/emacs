@@ -307,6 +307,9 @@
 
 (helm-mode 1)
 
+(advice-add 'helm-do-ag :override #'helm-ag)
+;; (advice-remove 'helm-do-ag #'helm-ag)
+
 (global-set-key (kbd "C-s") 'swiper-helm)
 
 (global-set-key (kbd "M-x") 'helm-M-x)
