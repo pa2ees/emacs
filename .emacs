@@ -51,7 +51,7 @@
       (java-pattern . "HH:mm:ss.SSS")
       (datetime-options))))
  '(package-selected-packages
-   '(persist project-persist jedi elpy dired-narrow gptel lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl smartparens magit highlight-parentheses abyss-theme)))
+   '(move-dup ag persist project-persist jedi elpy dired-narrow gptel lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl smartparens magit highlight-parentheses abyss-theme)))
 
 (package-initialize)
 
@@ -209,6 +209,11 @@
 ;; highlighting parens is good
 (global-highlight-parentheses-mode)
 
+;; ************* MOVE-DUP STUFF ********************
+(global-set-key (kbd "M-p") 'move-dup-move-lines-up)
+(global-set-key (kbd "M-n") 'move-dup-move-lines-down)
+(global-set-key (kbd "M-P") 'move-dup-duplicate-up)
+(global-set-key (kbd "M-N") 'move-dup-duplicate-down)
 
 ;; ************* MY FUNCTIONS **********************
 (load-file (concat user-emacs-init-directory "init_my_functions.el"))
