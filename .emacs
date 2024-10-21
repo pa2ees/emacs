@@ -229,11 +229,7 @@
 (global-set-key (kbd "M-Q") 'unfill-paragraph)
 
 ;; ************** CLANG-FORMAT *********************
-;; Run this for each mode you want to use the hook.
-(add-hook 'c-mode-common-hook (lambda () (clang-format-save-hook-for-this-buffer)))
-;; (add-hook 'c-mode-hook (lambda () (clang-format-save-hook-for-this-buffer)))
-;; (add-hook 'c++-mode-hook (lambda () (clang-format-save-hook-for-this-buffer)))
-
+(add-hook 'c-mode-common-hook #'clang-format+-mode)
 
 (setq-default tab-width 4)
 

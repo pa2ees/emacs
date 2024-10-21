@@ -1,3 +1,4 @@
+;; This function is no longer used in favor of the clang-format minor mode (clang-format+-mode)
 (defun clang-format-save-hook-for-this-buffer ()
   "Create a buffer local save hook."
   (add-hook 'before-save-hook
