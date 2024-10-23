@@ -1,13 +1,16 @@
 (defun clang-format-enable-this-buffer ()
   "Enable clang-formatting on save for this buffer"
+  (interactive)
   (add-hook 'before-save-hook #'evz/clang-format-this-buffer nil t))
 
 (defun clang-format-disable-this-buffer ()
   "Disable clang-formatting on save for this buffer"
+  (interactive)
   (remove-hook 'before-save-hook #'evz/clang-format-this-buffer t))
 
 (defun evz/clang-format-this-buffer ()
   "Clang-format this buffer"
+  (interactive)
   (let ((spec-file-dir (locate-dominating-file "." ".clang-format")))
     (if spec-file-dir
         (message "Clang-formatting buffer using %s.clang-format" spec-file-dir)
