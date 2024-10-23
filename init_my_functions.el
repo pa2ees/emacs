@@ -1,4 +1,19 @@
-;; This function is no longer used in favor of the clang-format minor mode (clang-format+-mode)
+(defun clang-format-enable-this-buffer ()
+  "Enable clang-formatting on save for this buffer"
+  (add-hook 'before-save-hook #'evz/clang-format-this-buffer nil t))
+
+(defun clang-format-disable-this-buffer ()
+  "Disable clang-formatting on save for this buffer"
+  (remove-hook 'before-save-hook #'evz/clang-format-this-buffer t))
+
+(defun evz/clang-format-this-buffer ()
+  "Clang-format this buffer"
+  (let ((spec-file-dir (locate-dominating-file "." ".clang-format")))
+    (if spec-file-dir
+        (message "Clang-formatting buffer using %s.clang-format" spec-file-dir)
+      (message "Clang-formatting buffer (.clang-format spec not found)"))
+    (clang-format-buffer)))
+      
 (defun clang-format-save-hook-for-this-buffer ()
   "Create a buffer local save hook."
   (add-hook 'before-save-hook
