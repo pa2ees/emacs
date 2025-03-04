@@ -155,7 +155,7 @@
 ;; (let ((frame-background-mode 'light)) (frame-set-background-mode nil))
 
 ;; ************* COMPANY MODE STUFF ****************
-
+  (add-hook 'company-mode-hook #'yas-minor-mode)
 
 ;; ************* LINUM STUFF ***********************
 (global-display-line-numbers-mode 1)
@@ -249,35 +249,7 @@
 
 
 ;; ************* C++ STUFF *************************
-
-(defun toggle-folding ()
-  (interactive)
-  (progn
-    (beginning-of-line)
-    (c-end-of-defun)
-    (c-beginning-of-defun)
-    (c-syntactic-re-search-forward "{" nil 'eob)
-    (backward-char)
-    (hs-toggle-hiding)))
-
-(defun beginning-of-next-defun ()
-  (interactive)
-  (c-beginning-of-defun -1))
-
-(add-hook 'c-initialization-hook
-          (lambda ()
-            (local-set-key (kbd "C-M-p") 'c-beginning-of-defun)
-            (local-set-key (kbd "C-M-n") 'beginning-of-next-defun)
-            (local-set-key (kbd "C-M-N") 'c-end-of-defun)
-            (local-set-key (kbd "C-;") 'toggle-folding)
-            (local-set-key (kbd "C-c f t") 'toggle-folding) ;; f(old) t(oggle)
-            (local-set-key (kbd "C-c f s") 'hs-show-all) ;; f(old) s(how all)
-            (local-set-key (kbd "C-c f h") 'hs-hide-all) ;; f(old) h(ide all)
-            ))
-
-(add-hook 'c-mode-common-hook
-          (lambda ()
-            (hs-minor-mode)))
+(load-file (concat user-emacs-init-directory "init_c-mode.el"))
 
 
 ;; ************* MAGIT STUFF ***********************
@@ -291,17 +263,7 @@
 (load-file (concat user-emacs-init-directory "init_ibuffer.el"))
 
 ;; ************* HELM MODE STUFF *******************
-;; (require 'helm-config)
 (require 'swiper-helm)
-
-
-;; helm stuff to try
-;; helm-gitlab
-;; helm-rg helm ripgrep
-
-;; (setq helm-display-function 'helm-display-buffer-in-own-frame
-;;         helm-display-buffer-reuse-frame t
-;;         helm-use-undecorated-frame-option t)
 
 (helm-mode 1)
 
