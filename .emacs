@@ -31,6 +31,8 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    '("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" "d8dc153c58354d612b2576fea87fe676a3a5d43bcc71170c62ddde4a1ad9e1fb" default))
+ ;; '(git-messenger:show-detail t)
+ ;; '(git-messenger:use-magit-popup t)
  '(inhibit-startup-screen t)
  '(logview-additional-level-mappings
    '(("imsar_levels"
@@ -51,7 +53,7 @@
       (java-pattern . "HH:mm:ss.SSS")
       (datetime-options))))
  '(package-selected-packages
-   '(move-dup ag persist project-persist jedi elpy dired-narrow gptel lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl smartparens magit highlight-parentheses abyss-theme)))
+   '(git-messenger move-dup ag persist project-persist jedi elpy dired-narrow gptel lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl smartparens magit highlight-parentheses abyss-theme)))
 
 (package-initialize)
 
@@ -246,6 +248,13 @@
 
 ;; ************* C++ STUFF *************************
 (load-file (concat user-emacs-init-directory "init_c-mode.el"))
+
+;; ************* GIT-MESSENGER STUFF ***************
+;; keyboard shortcut: C-x (p)roject (b)lame
+;; needed to remove the projectile key-binding for this (see init_projectile.el)
+(global-set-key (kbd "C-x p b") 'git-messenger:popup-message)
+(setq git-messenger:show-detail t)
+(setq git-messenger:use-magit-popup t)
 
 
 ;; ************* MAGIT STUFF ***********************

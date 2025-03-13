@@ -15,6 +15,9 @@
 
 (advice-add 'projectile-compile-project :override 'projectile-comphist-compile)
 
+;; remove key mapping to projectile-switch-buffer
+(with-eval-after-load 'projectile
+  (define-key projectile-mode-map (kbd "C-x p b") nil))
 
 
 ;; (defun evz/projectile-compilation-command (compile-dir)
