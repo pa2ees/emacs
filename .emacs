@@ -250,12 +250,7 @@
 (load-file (concat user-emacs-init-directory "init_c-mode.el"))
 
 ;; ************* GIT-MESSENGER STUFF ***************
-;; keyboard shortcut: C-x (p)roject (b)lame
-;; needed to remove the projectile key-binding for this (see init_projectile.el)
-(global-set-key (kbd "C-x p b") 'git-messenger:popup-message)
-(setq git-messenger:show-detail t)
-(setq git-messenger:use-magit-popup t)
-
+(load-file (concat user-emacs-init-directory "init_git_messenger.el"))
 
 ;; ************* MAGIT STUFF ***********************
 (global-set-key (kbd "C-x g") 'magit-status)
