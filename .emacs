@@ -248,15 +248,21 @@
 
 ;; ************* C++ STUFF *************************
 (load-file (concat user-emacs-init-directory "init_c-mode.el"))
+(load-file (concat user-emacs-init-directory "init_python_bindings_helpers.el"))
 
 ;; ************* GIT-MESSENGER STUFF ***************
 (load-file (concat user-emacs-init-directory "init_git_messenger.el"))
 
+;; ************* PROJECTILE STUFF ******************
+;; This needs to come before magit stuff because evz/helm-select-project-magit
+;; depends on it
+(load-file (concat user-emacs-init-directory "init_projectile.el"))
+
 ;; ************* MAGIT STUFF ***********************
-(global-set-key (kbd "C-x g") 'magit-status)
+(load-file (concat user-emacs-init-directory "init_magit.el"))
+(global-set-key (kbd "C-x g") 'evz/helm-select-project-magit)
 (setenv "GIT_ASKPASS" "git-gui--askpass")
 (setenv "SSH_ASKPASS" "git-gui--askpass")
-(load-file (concat user-emacs-init-directory "init_magit.el"))
 
 
 ;; ************* IBUFF STUFF ***********************
@@ -278,9 +284,6 @@
 
 ;; ************* VERILOG STUFF *********************
 (load-file (concat user-emacs-init-directory "init_verilog.el"))
-
-;; ************* PROJECTILE STUFF ******************
-(load-file (concat user-emacs-init-directory "init_projectile.el"))
 
 ;; ************* SPACELINE STUFF *******************
 (load-file (concat user-emacs-init-directory "init_spaceline.el"))

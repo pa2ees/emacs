@@ -46,3 +46,8 @@
 (defun evz/add-d-to-ediff-mode-map () (define-key ediff-mode-map "d" 'evz/ediff-copy-both-to-C))
 (add-hook 'ediff-keymap-setup-hook #'evz/add-d-to-ediff-mode-map)
 
+(defun evz/helm-select-project-magit ()
+  "Select a project from the hierarchy and run `magit-status` on it."
+  (interactive)
+  (let ((working-project-dir (or (evz/helm-select-project "Select Project for Magit") default-directory)))
+    (magit-status working-project-dir)))
