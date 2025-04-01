@@ -13,7 +13,7 @@
 
 (require 'projectile-comphist)
 
-(advice-add 'projectile-compile-project :override 'projectile-comphist-compile)
+;; (advice-add 'projectile-compile-project :override 'projectile-comphist-compile)
 
 (defun evz/get-project-hierarchy ()
   (let ((hierarchy '())
@@ -49,13 +49,19 @@
 (defun evz/helm-projectile-ag (&rest args)
   (interactive "P")
   (let ((default-directory (or (evz/helm-select-project "Select Project for Ag") default-directory)))
-    (apply #'helm-projectile-ag args)
-    ))
+    (apply #'helm-projectile-ag args)))
+
+(defun evz/helm-projectile-compile-project (&rest args)
+  (interactive "P")
+  (let ((default-directory (or (evz/helm-select-project "Select Project for compiling") default-directory)))
+    (apply #'projectile-comphist-compile args)))
+    
 
 ;; remove key mapping to projectile-switch-buffer
 (with-eval-after-load 'projectile
   (define-key projectile-mode-map (kbd "C-x p b") nil)
-  (define-key projectile-mode-map (kbd "C-x p s s") 'evz/helm-projectile-ag))
+  (define-key projectile-mode-map (kbd "C-x p s s") 'evz/helm-projectile-ag)
+  (define-key projectile-mode-map (kbd "C-x p c c") 'evz/helm-projectile-compile-project))
 
 
 ;; (defun evz/projectile-compilation-command (compile-dir)
