@@ -68,8 +68,6 @@
 
 ;; https://trivialfis.github.io/emacs/2017/08/02/C-C++-Development-Environment-on-Emacs.html
 
-;; check out ibuffer-projectile or ibuffer-vc (ibuffer version control)
-
 ;; melpa
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
@@ -272,9 +270,6 @@
 (require 'swiper-helm)
 
 (helm-mode 1)
-
-(advice-add 'helm-do-ag :override #'helm-ag)
-;; (advice-remove 'helm-do-ag #'helm-ag)
 
 (global-set-key (kbd "C-s") 'swiper-helm)
 

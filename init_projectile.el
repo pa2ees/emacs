@@ -46,12 +46,9 @@
                        :action #'identity)
             :buffer "*helm project hierarchy*")))))
 
-(defun evz/helm-projectile-ag (&rest args)
-  (interactive "P")
-  (let ((default-directory (or (evz/helm-select-project "Select Project for Ag") default-directory)))
-    (apply #'helm-projectile-ag args)))
+(load-file (concat user-emacs-init-directory "init_helm_projectile_ag.el"))
 
-(defun evz/helm-projectile-compile-project (&rest args)
+(defun evz/helm-select-project--helm-projectile-compile-project (&rest args)
   (interactive "P")
   (let ((default-directory (or (evz/helm-select-project "Select Project for compiling") default-directory)))
     (apply #'projectile-comphist-compile args)))
@@ -60,14 +57,6 @@
 ;; remove key mapping to projectile-switch-buffer
 (with-eval-after-load 'projectile
   (define-key projectile-mode-map (kbd "C-x p b") nil)
-  (define-key projectile-mode-map (kbd "C-x p s s") 'evz/helm-projectile-ag)
-  (define-key projectile-mode-map (kbd "C-x p c c") 'evz/helm-projectile-compile-project))
+  (define-key projectile-mode-map (kbd "C-x p s s") 'evz/helm-select-project--helm-projectile-ag)
+  (define-key projectile-mode-map (kbd "C-x p c c") 'evz/helm-select-project--helm-projectile-compile-project))
 
-
-;; (defun evz/projectile-compilation-command (compile-dir)
-;;   "echo hello")
-;; (advice-add 'projectile-compilation-command :override 'evz/projectile-compilation-command)
-;; (file-exists-p (concat (projectile-compilation-dir) "build.sh"))
-;; (message projectile-project-compilation-cmddd)
-
-;; (message  (if (projectile--cache-project-commands-p) "yes" "no"))
