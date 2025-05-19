@@ -106,6 +106,9 @@
 (setq inhibit-startup-screen t)
 (put 'narrow-to-region 'disabled nil)
 
+;; TODO: unset this only when using windowed emacs
+;;(global-unset-key (kbd "C-z"))
+
 ;; Control where autosaves go
 (setq
  backup-by-copying t      ; don't clobber symlinks

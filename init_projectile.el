@@ -6,14 +6,10 @@
 
 (helm-projectile-on)
 
-;; (load-file (concat user-emacs-init-directory "project_comphist.el"))
-
 ;; This is temporary until project-comphist is available on MELPA
-(push "~/projects/projectile-comphist/" load-path)
+(push "~/projects/pchist/" load-path)
 
-(require 'projectile-comphist)
-
-;; (advice-add 'projectile-compile-project :override 'projectile-comphist-compile)
+(require 'pchist)
 
 (defun evz/get-project-hierarchy ()
   (let ((hierarchy '())
@@ -51,12 +47,13 @@
 (defun evz/helm-select-project--helm-projectile-compile-project (&rest args)
   (interactive "P")
   (let ((default-directory (or (evz/helm-select-project "Select Project for compiling") default-directory)))
-    (apply #'projectile-comphist-compile args)))
+    (apply #'pchist-compile args)))
     
 
 ;; remove key mapping to projectile-switch-buffer
 (with-eval-after-load 'projectile
   (define-key projectile-mode-map (kbd "C-x p b") nil)
   (define-key projectile-mode-map (kbd "C-x p s s") 'evz/helm-select-project--helm-projectile-ag)
-  (define-key projectile-mode-map (kbd "C-x p c c") 'evz/helm-select-project--helm-projectile-compile-project))
+  (define-key projectile-mode-map (kbd "C-x p c c") 'evz/helm-select-project--helm-projectile-compile-project)
+  (define-key projectile-mode-map (kbd "C-x p c e") 'pchist-manage-commands))
 
