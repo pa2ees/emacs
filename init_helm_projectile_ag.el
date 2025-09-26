@@ -108,3 +108,8 @@ OPTIONS explicit command line arguments to ag"
   (interactive "P")
   (let ((default-directory (or (evz/helm-select-project "Select Project for Ag") default-directory)))
     (apply #'evz/helm-projectile-ag args)))
+
+(defun evz/helm-select-project--helm-projectile-find-file (&rest args)
+  (interactive "P")
+  (let ((default-directory (or (evz/helm-select-project "Select Project for Ag") default-directory)))
+    (apply #'helm-projectile-find-file args)))

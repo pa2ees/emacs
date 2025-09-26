@@ -1,4 +1,6 @@
 (setq projectile-switch-project-action #'projectile-dired)
+(setq projectile-indexing-method 'alien)
+(setq projectile-enable-caching t)
 (projectile-mode +1)
 (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
 
@@ -54,6 +56,7 @@
 (with-eval-after-load 'projectile
   (define-key projectile-mode-map (kbd "C-x p b") nil)
   (define-key projectile-mode-map (kbd "C-x p s s") 'evz/helm-select-project--helm-projectile-ag)
+  (define-key projectile-mode-map (kbd "C-x p f") 'evz/helm-select-project--helm-projectile-find-file)
   (define-key projectile-mode-map (kbd "C-x p c c") 'evz/helm-select-project--helm-projectile-compile-project)
   (define-key projectile-mode-map (kbd "C-x p c e") 'pchist-manage-commands))
 
