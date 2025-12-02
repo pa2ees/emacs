@@ -9,9 +9,14 @@
 (helm-projectile-on)
 
 ;; This is temporary until project-comphist is available on MELPA
-(push "~/projects/pchist/" load-path)
-
-(require 'pchist)
+(eval-and-compile
+  (let ((pchist-dir "~/projects/pchist/"))
+    (push pchist-dir load-path)
+    ;; compile all of pchist if needed
+    (when (file-exists-p pchist-dir)
+      (message "Recompiling pchist directory: %s" pchist-dir)
+      (byte-recompile-directory pchist-dir 0)))   ;; 0 = only recompile outdated files
+  (require 'pchist))
 
 (defun evz/get-project-hierarchy ()
   (let ((hierarchy '())

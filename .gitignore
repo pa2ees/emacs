@@ -1,3 +1,8 @@
 \#*#
 .\#*
 *~
+*.elc
+.emacs.d
+snippets
+transient
+elpa

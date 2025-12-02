@@ -3,7 +3,6 @@
 (require 'helm-org)
 (require 'org-download)
 
-
 ;; ----- KEYBOARD BINDINGS -----
 ;; Define C-c o as the Org prefix
 (define-prefix-command 'my-org-prefix)

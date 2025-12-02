@@ -53,7 +53,7 @@
       (java-pattern . "yyyyMMdd_hh:MM:ss.SSS")
       (datetime-options))))
  '(package-selected-packages
-   '(org-download org-modern helm-org plantuml-mode git-messenger move-dup ag persist project-persist jedi elpy dired-narrow gptel lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl smartparens magit highlight-parentheses abyss-theme)))
+   '(auto-compile org-download org-modern helm-org plantuml-mode git-messenger move-dup ag persist project-persist jedi elpy dired-narrow gptel lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl smartparens magit highlight-parentheses abyss-theme)))
 
 (package-initialize)
 
@@ -99,6 +99,29 @@
   :config
   (setq treemacs-is-never-other-window t
         treemacs-default-visit-action 'treemacs-visit-node-in-most-recently-used-window))
+
+(use-package auto-compile
+  :ensure t
+  :config
+  ;; Do NOT enable global modes
+  (setq auto-compile-on-save-mode nil)
+  (setq auto-compile-on-load-mode nil))
+
+;; helper function for loading files
+;; byte-compiles the file if the .elc doesn't exist, or the .el is newer
+(setq evz/compiled-load-files '())
+(defun evz/compile-maybe-and-load (file)
+  "Byte-compile FILE.el if needed, then load FILE (preferring FILE.elc)."
+  (let* ((el (concat file ".el"))
+         (elc (concat file ".elc")))
+    ;; Compile if missing or stale
+    (when (or (not (file-exists-p elc))
+              (file-newer-than-file-p el elc))
+      (message "compiling %s..." el)
+      (push el evz/compiled-load-files)
+      (byte-compile-file el))
+    ;; Load without extension → Emacs prefers .elc
+    (load file)))
 
 
 ;; misc setup things
@@ -181,7 +204,8 @@
 
 
 ;; ************* DIRED MODE STUFF ******************
-(load-file (concat user-emacs-init-directory "init_dired.el"))
+(evz/compile-maybe-and-load (concat user-emacs-init-directory "init_dired"))
+;; (load-file (concat user-emacs-init-directory "init_dired.el"))
 
 
 ;; ************* PYTHON STUFF **********************
@@ -217,7 +241,8 @@
 (global-set-key (kbd "M-N") 'move-dup-duplicate-down)
 
 ;; ************* MY FUNCTIONS **********************
-(load-file (concat user-emacs-init-directory "init_my_functions.el"))
+(evz/compile-maybe-and-load (concat user-emacs-init-directory "init_my_functions"))
+;; (load-file (concat user-emacs-init-directory "init_my_functions.el"))
 
 ;; bind keyboard commands to my functions
 (global-set-key (kbd "C-S-k") 'kill-line-no-save-to-kill-ring)
@@ -250,8 +275,10 @@
 
 
 ;; ************* C++ STUFF *************************
-(load-file (concat user-emacs-init-directory "init_c-mode.el"))
-(load-file (concat user-emacs-init-directory "init_python_bindings_helpers.el"))
+(evz/compile-maybe-and-load (concat user-emacs-init-directory "init_c-mode"))
+(evz/compile-maybe-and-load (concat user-emacs-init-directory "init_python_bindings_helpers"))
+;; (load-file (concat user-emacs-init-directory "init_c-mode.el"))
+;; (load-file (concat user-emacs-init-directory "init_python_bindings_helpers.el"))
 
 ;; ************* GIT-MESSENGER STUFF ***************
 (load-file (concat user-emacs-init-directory "init_git_messenger.el"))
@@ -259,17 +286,20 @@
 ;; ************* PROJECTILE STUFF ******************
 ;; This needs to come before magit stuff because evz/helm-select-project-magit
 ;; depends on it
-(load-file (concat user-emacs-init-directory "init_projectile.el"))
+(evz/compile-maybe-and-load (concat user-emacs-init-directory "init_projectile"))
+;; (load-file (concat user-emacs-init-directory "init_projectile.el"))
 
 ;; ************* MAGIT STUFF ***********************
-(load-file (concat user-emacs-init-directory "init_magit.el"))
+(evz/compile-maybe-and-load (concat user-emacs-init-directory "init_magit"))
+;; (load-file (concat user-emacs-init-directory "init_magit.el"))
 (global-set-key (kbd "C-x g") 'evz/helm-select-project-magit)
 (setenv "GIT_ASKPASS" "git-gui--askpass")
 (setenv "SSH_ASKPASS" "git-gui--askpass")
 
 
 ;; ************* IBUFF STUFF ***********************
-(load-file (concat user-emacs-init-directory "init_ibuffer.el"))
+(evz/compile-maybe-and-load (concat user-emacs-init-directory "init_ibuffer"))
+;; (load-file (concat user-emacs-init-directory "init_ibuffer.el"))
 
 ;; ************* HELM MODE STUFF *******************
 (require 'swiper-helm)
@@ -283,13 +313,16 @@
 
 ;; ************* ORG MODE STUFF ********************
 ;; required to be after helm
-(load-file (concat user-emacs-init-directory "init_org.el"))
+;; (load-file (concat user-emacs-init-directory "init_org.el"))
+;; (load (concat user-emacs-init-directory "init_org"))
+(evz/compile-maybe-and-load (concat user-emacs-init-directory "init_org"))
 
 ;; ************* VERILOG STUFF *********************
 (load-file (concat user-emacs-init-directory "init_verilog.el"))
 
 ;; ************* POWERLINE STUFF *******************
-(load-file (concat user-emacs-init-directory "init_powerline.el"))
+(evz/compile-maybe-and-load (concat user-emacs-init-directory "init_powerline"))
+;; (load-file (concat user-emacs-init-directory "init_powerline.el"))
 
 ;; ************* LSP-MODE STUFF ********************
 (load-file (concat user-emacs-init-directory "init_lsp-mode.el"))
