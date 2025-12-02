@@ -7,6 +7,7 @@
                ("C/C++" (or
                          (mode . c++-mode)
                          (mode . c-mode)))
+               ("cmake" (mode . cmake-mode))                         
                ("perl" (mode . cperl-mode))
                ("python" (or
                           (mode . python-mode)
@@ -15,6 +16,9 @@
                ("erc" (mode . erc-mode))
                ("lisp" (or
                             (mode . emacs-lisp-mode)))
+               ("org" (or
+                       (mode . org-mode)
+                       (mode . org-agenda-mode)))
                ("planner" (or
                            (name . "^\\*Calendar\\*$")
                            (name . "^diary$")

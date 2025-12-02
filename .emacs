@@ -19,7 +19,6 @@
 
 ;; C:/_projects/emacs/.emacs should be set to wherever the .emacs file actually is.
 
-
 ;; Added by Package.el.  This must come before configurations of
 ;; installed packages.  Don't delete this line.  If you don't want it,
 ;; just comment it out by adding a semicolon to the start of the line.
@@ -49,9 +48,12 @@
  '(logview-additional-timestamp-formats
    '(("imsar_timestamp"
       (java-pattern . "HH:mm:ss.SSS")
+      (datetime-options))
+     ("imsar_datetimestamp"
+      (java-pattern . "yyyyMMdd_hh:MM:ss.SSS")
       (datetime-options))))
  '(package-selected-packages
-   '(plantuml-mode git-messenger move-dup ag persist project-persist jedi elpy dired-narrow gptel lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl smartparens magit highlight-parentheses abyss-theme)))
+   '(org-download org-modern helm-org plantuml-mode git-messenger move-dup ag persist project-persist jedi elpy dired-narrow gptel lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl smartparens magit highlight-parentheses abyss-theme)))
 
 (package-initialize)
 
@@ -177,9 +179,6 @@
 ;; (require 'confluence)
 ;; (setq confluence-url "https://confluence.imsar.us")
 
-;; ************* ORG MODE STUFF ********************
-(global-set-key (kbd "C-c l") 'org-store-link)
-
 
 ;; ************* DIRED MODE STUFF ******************
 (load-file (concat user-emacs-init-directory "init_dired.el"))
@@ -282,12 +281,15 @@
 (global-set-key (kbd "M-x") 'helm-M-x)
 (global-set-key (kbd "C-x C-f") 'helm-find-files)
 
+;; ************* ORG MODE STUFF ********************
+;; required to be after helm
+(load-file (concat user-emacs-init-directory "init_org.el"))
 
 ;; ************* VERILOG STUFF *********************
 (load-file (concat user-emacs-init-directory "init_verilog.el"))
 
-;; ************* SPACELINE STUFF *******************
-(load-file (concat user-emacs-init-directory "init_spaceline.el"))
+;; ************* POWERLINE STUFF *******************
+(load-file (concat user-emacs-init-directory "init_powerline.el"))
 
 ;; ************* LSP-MODE STUFF ********************
 (load-file (concat user-emacs-init-directory "init_lsp-mode.el"))
