@@ -135,7 +135,6 @@ If a project exists, separate with `|`. If no project, return just the buffer na
                (powerline-raw " " face1)))
          (rhs (list
                (funcall separator-right face2 face1)
-               (powerline-raw global-mode-string face1 'r)
                (powerline-raw " %l:%c" face1 'r)
                (funcall separator-right face1 face0)
                (powerline-raw " %p" face0 'r)

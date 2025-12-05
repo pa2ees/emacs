@@ -275,10 +275,10 @@
 
 
 ;; ************* C++ STUFF *************************
-(evz/compile-maybe-and-load (concat user-emacs-init-directory "init_c-mode"))
-(evz/compile-maybe-and-load (concat user-emacs-init-directory "init_python_bindings_helpers"))
-;; (load-file (concat user-emacs-init-directory "init_c-mode.el"))
-;; (load-file (concat user-emacs-init-directory "init_python_bindings_helpers.el"))
+;; (evz/compile-maybe-and-load (concat user-emacs-init-directory "init_c-mode"))
+;; (evz/compile-maybe-and-load (concat user-emacs-init-directory "init_python_bindings_helpers"))
+(load-file (concat user-emacs-init-directory "init_c-mode.el"))
+(load-file (concat user-emacs-init-directory "init_python_bindings_helpers.el"))
 
 ;; ************* GIT-MESSENGER STUFF ***************
 (load-file (concat user-emacs-init-directory "init_git_messenger.el"))
@@ -286,12 +286,12 @@
 ;; ************* PROJECTILE STUFF ******************
 ;; This needs to come before magit stuff because evz/helm-select-project-magit
 ;; depends on it
-(evz/compile-maybe-and-load (concat user-emacs-init-directory "init_projectile"))
-;; (load-file (concat user-emacs-init-directory "init_projectile.el"))
+;; (evz/compile-maybe-and-load (concat user-emacs-init-directory "init_projectile"))
+(load-file (concat user-emacs-init-directory "init_projectile.el"))
 
 ;; ************* MAGIT STUFF ***********************
-(evz/compile-maybe-and-load (concat user-emacs-init-directory "init_magit"))
-;; (load-file (concat user-emacs-init-directory "init_magit.el"))
+;; (evz/compile-maybe-and-load (concat user-emacs-init-directory "init_magit"))
+(load-file (concat user-emacs-init-directory "init_magit.el"))
 (global-set-key (kbd "C-x g") 'evz/helm-select-project-magit)
 (setenv "GIT_ASKPASS" "git-gui--askpass")
 (setenv "SSH_ASKPASS" "git-gui--askpass")
