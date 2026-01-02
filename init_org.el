@@ -90,6 +90,7 @@
 (setq org-notes-file        (notes-path "notes.org"))
 (setq org-todo-file         (notes-path "todo.org"))
 (setq org-archive-file      (notes-path "archive.org"))
+(setq org-journal-path      (notes-path "journal/"))
 
 (setq org-agenda-files (list org-mobile-inbox-file
                              org-inbox-file
@@ -102,11 +103,59 @@
 (setq org-download-image-dir "~/notes/images/")
 (setq org-download-method 'directory)
 
+;; ----- LARGE CAPTURE TEMPLATE STRINGS -----
+(defvar daily-journal-template
+  "#+TITLE: Daily Journal
+#+PROPERTY: DATE: %<%Y-%b-%d>
+
+* Metrics
+** Sleep Quality: %?*/10
+- Bed Time:
+- Snooze Time: 
+- Get Up Time: 
+- Notes:
+** Energy: */10
+** Mood: */10
+** Focus: */10
+- Minutes Unfocused: 0
+
+* Morning Routine [/]
+- [ ] Make bed
+- [ ] Exercise
+- [ ] Shower
+- [ ] Breakfast
+- [ ] Vitamins
+- [ ] Meditation/Prayer
+- [ ] Scripture Reading
+
+* Daily Todo [/]
+- [ ] Reading
+- [ ] Topics
+- [ ] Audio
+- [ ] DreamStream
+- [ ] Share my Story
+- [ ] Coach upline
+
+* Evening Routine [/]
+- [ ] Brush Teeth
+- [ ] Prep for tomorrow
+- [ ] Beauty Before Bed ([[id:f2330f95-8cae-4ae4-acfd-32c3d6b70da4][source]]) [/]
+  - [ ] Review your day
+  - [ ] Recall three beautiful moments [/]
+    - [ ] 
+    - [ ] 
+    - [ ] 
+  - [ ] Reprogram the mistakes and let go of the day
+  - [ ] Preview tomorrow
+  - [ ] Visualize tomorrow
+
+* Journal Entry
+
+")
 
 ;; ----- CAPTURE TEMPLATES -----
 (setq org-capture-templates
-      '(
-
+      `(
         ;; -- Notes Section (prefix: n) --
         ("n" "Notes")
 
@@ -147,9 +196,15 @@
          "* TODO %^{Task} :%^G:\n- Date: %U\nLink: %a\n%?")
 
         ;; Journal
-        ("j" "Journal" entry
-         (file+headline org-inbox-file "Journal")
-         "* %U :journal:%^G:\n%?")
+        ("j" "Journal" plain
+         (file (lambda ()
+                 (concat org-journal-path
+                         (format-time-string "%Y-%m-%d")
+                         ".org")))
+         ;; "* Hello")
+         ,daily-journal-template
+         :immediate-finish t
+         :jump-to-captured t)
 
         ;; -- Add Entries Section (prefix: e) --
         ("e" "Add Entry")
