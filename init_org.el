@@ -121,7 +121,7 @@
 
 * Morning Routine [/]
 - [ ] Make bed
-- [ ] Exercise
+- [ ] Exercise ([[id:699babac-f415-41cd-8961-9e386455cbff][Workout]]) 
 - [ ] Shower
 - [ ] Breakfast
 - [ ] Vitamins
