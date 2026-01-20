@@ -83,6 +83,12 @@
   (let ((fill-column (point-max)))
     (fill-paragraph nil)))
 
+(define-minor-mode zoom-mode
+  "Tmux-style window zoom."
+  :init-value nil
+  :lighter " ZOOM"
+  :global nil)
+
 (defvar evz/zoom--window-config nil
   "Saved window configuration for tmux-style zoom.")
 
@@ -93,8 +99,10 @@
       ;; Restore
       (progn
         (set-window-configuration evz/zoom--window-config)
-        (setq evz/zoom--window-config nil))
+        (setq evz/zoom--window-config nil)
+        (zoom-mode -1))
     ;; Zoom
     (when (> (count-windows) 1)
       (setq evz/zoom--window-config (current-window-configuration))
-      (delete-other-windows))))
+      (delete-other-windows)
+      (zoom-mode 1))))

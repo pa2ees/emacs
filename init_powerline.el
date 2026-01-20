@@ -70,10 +70,22 @@ If a project exists, separate with `|`. If no project, return just the buffer na
         (seg-prev-face prev-face)
         (seg-this-face alt-face)
         (display-vc (powerline-vc))
-        ;; (lhs-width (powerline-width lhs))
-        ;; (rhs-width (powerline-width rhs))
         (margin 1))
     
+    (when zoom-mode
+      (let* ((zoom-segments (list
+                           (funcall separator seg-prev-face seg-this-face)
+                           ;; (powerline-vc seg-this-face 'l)
+                           (powerline-raw " Zoomed " seg-this-face)))
+             (zoom-width (powerline-width zoom-segments))
+             (result-width (powerline-width result)))
+        ;; if the width is good, add the segments
+        (when (< (+ space zoom-width result-width margin) (window-width))
+          (dolist (seg zoom-segments)
+            (push seg result))
+          ;; swap prev and this face
+          (cl-rotatef seg-prev-face seg-this-face))))
+
     (when display-vc
       (let* ((vc-segments (list
                            (funcall separator seg-prev-face seg-this-face)
