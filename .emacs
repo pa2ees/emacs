@@ -53,7 +53,7 @@
       (java-pattern . "yyyyMMdd_hh:MM:ss.SSS")
       (datetime-options))))
  '(package-selected-packages
-   '(auto-compile org-download org-modern helm-org plantuml-mode git-messenger move-dup ag persist project-persist jedi elpy dired-narrow gptel lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl smartparens magit highlight-parentheses abyss-theme)))
+   '(org-tree-slide auto-compile org-download org-modern helm-org plantuml-mode git-messenger move-dup ag persist project-persist jedi elpy dired-narrow gptel lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl smartparens magit highlight-parentheses abyss-theme)))
 
 (package-initialize)
 
@@ -253,6 +253,7 @@
 (global-set-key (kbd "M-F") 'forward-symbol)
 (global-set-key (kbd "s-n") 'set-frame-name)
 (global-set-key (kbd "M-Q") 'unfill-paragraph)
+(global-set-key (kbd "C-c z") #'evz/zoom-toggle)
 
 ;; ************** CLANG-FORMAT *********************
 ;; (add-hook 'c-mode-common-hook #'clang-format+-mode)

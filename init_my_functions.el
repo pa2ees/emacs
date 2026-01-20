@@ -82,3 +82,19 @@
   (interactive)
   (let ((fill-column (point-max)))
     (fill-paragraph nil)))
+
+(defvar evz/zoom--window-config nil
+  "Saved window configuration for tmux-style zoom.")
+
+(defun evz/zoom-toggle ()
+  "Toggle tmux-style zoom for the current window."
+  (interactive)
+  (if evz/zoom--window-config
+      ;; Restore
+      (progn
+        (set-window-configuration evz/zoom--window-config)
+        (setq evz/zoom--window-config nil))
+    ;; Zoom
+    (when (> (count-windows) 1)
+      (setq evz/zoom--window-config (current-window-configuration))
+      (delete-other-windows))))
