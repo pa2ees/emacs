@@ -74,7 +74,7 @@
 (add-hook 'org-mode-hook #'org-indent-mode)
 (add-hook 'org-agenda-finalize-hook #'org-modern-agenda)
 ;; set to t to not display the '+' for +strikethrough+ or '*' for *bold*
-(setq org-hide-emphasis-markers nil) 
+(setq org-hide-emphasis-markers t) 
 ;; set to display /alpha as the unicode character alpha (only for display)
 (setq org-pretty-entities nil)
 ;; replace asterisks with bullets. 

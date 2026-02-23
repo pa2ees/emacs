@@ -51,3 +51,4 @@
   (interactive)
   (let ((working-project-dir (or (evz/helm-select-project "Select Project for Magit") default-directory)))
     (magit-status working-project-dir)))
+

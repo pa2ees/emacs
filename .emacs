@@ -53,7 +53,7 @@
       (java-pattern . "yyyyMMdd_hh:MM:ss.SSS")
       (datetime-options))))
  '(package-selected-packages
-   '(org-tree-slide auto-compile org-download org-modern helm-org plantuml-mode git-messenger move-dup ag persist project-persist jedi elpy dired-narrow gptel lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl smartparens magit highlight-parentheses abyss-theme)))
+   '(forge magit transient org-tree-slide auto-compile org-download org-modern helm-org plantuml-mode git-messenger move-dup ag persist project-persist jedi elpy dired-narrow gptel lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl smartparens highlight-parentheses abyss-theme)))
 
 (package-initialize)
 
@@ -290,13 +290,25 @@
 ;; (evz/compile-maybe-and-load (concat user-emacs-init-directory "init_projectile"))
 (load-file (concat user-emacs-init-directory "init_projectile.el"))
 
+;; ************* FORGE STUFF ***********************
+;; see https://docs.magit.vc/devel/forge/forge.pdf for setup
+(use-package forge
+  :after magit)
+(with-eval-after-load 'forge
+  (push '("gitlabee.imsar.us"        ; GITHOST
+          "gitlabee.imsar.us/api/v4" ; APIHOST
+          "gitlabee.imsar.us"        ; WEBHOST and INSTANCE-ID
+          forge-gitlab-repository)   ; CLASS
+        forge-alist)
+  (setq auth-sources '("~/.authinfo")))
+
+
 ;; ************* MAGIT STUFF ***********************
 ;; (evz/compile-maybe-and-load (concat user-emacs-init-directory "init_magit"))
 (load-file (concat user-emacs-init-directory "init_magit.el"))
 (global-set-key (kbd "C-x g") 'evz/helm-select-project-magit)
 (setenv "GIT_ASKPASS" "git-gui--askpass")
 (setenv "SSH_ASKPASS" "git-gui--askpass")
-
 
 ;; ************* IBUFF STUFF ***********************
 (evz/compile-maybe-and-load (concat user-emacs-init-directory "init_ibuffer"))
