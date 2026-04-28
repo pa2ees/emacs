@@ -29,31 +29,37 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" "d8dc153c58354d612b2576fea87fe676a3a5d43bcc71170c62ddde4a1ad9e1fb" default))
+   '("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e"
+     "84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279"
+     "d8dc153c58354d612b2576fea87fe676a3a5d43bcc71170c62ddde4a1ad9e1fb"
+     default))
  '(inhibit-startup-screen t)
  '(logview-additional-level-mappings
-   '(("imsar_levels"
-      (error "error")
-      (warning "warning")
-      (information "info")
-      (debug "debug")
-      (trace "trace")
-      (aliases))))
+   '(("imsar_levels" (error "error") (warning "warning")
+      (information "info") (debug "debug") (trace "trace") (aliases))))
  '(logview-additional-submodes
-   '(("imsar"
-      (format . "[TIMESTAMP][LEVEL][NAME]")
-      (levels . "imsar_levels")
-      (timestamp "imsar_timestamp")
+   '(("imsar" (format . "[TIMESTAMP][LEVEL][NAME]")
+      (levels . "imsar_levels") (timestamp "imsar_timestamp")
       (aliases))))
  '(logview-additional-timestamp-formats
-   '(("imsar_timestamp"
-      (java-pattern . "HH:mm:ss.SSS")
+   '(("imsar_timestamp" (java-pattern . "HH:mm:ss.SSS")
       (datetime-options))
-     ("imsar_datetimestamp"
-      (java-pattern . "yyyyMMdd_hh:MM:ss.SSS")
+     ("imsar_datetimestamp" (java-pattern . "yyyyMMdd_hh:MM:ss.SSS")
       (datetime-options))))
  '(package-selected-packages
-   '(forge magit transient org-tree-slide auto-compile org-download org-modern helm-org plantuml-mode git-messenger move-dup ag persist project-persist jedi elpy dired-narrow gptel lsp-mode vterm graphviz-dot-mode yaml-mode log4j-mode logview cmake-mode xterm-color helm-ag clang-format clang-format+ helm-gtags ggtags helm-lsp general company company-jedi yasnippet yasnippet-snippets spaceline smart-mode-line-powerline-theme smart-mode-line helm-projectile projectile treemacs treemacs-projectile swiper swiper-helm helm dired-sidebar dired-toggle diredfl smartparens highlight-parentheses abyss-theme)))
+   '(abyss-theme ag auto-compile clang-format clang-format+ cmake-mode
+                 company company-jedi dired-narrow dired-sidebar
+                 dired-toggle diredfl elpy forge general ggtags
+                 git-messenger gptel graphviz-dot-mode helm helm-ag
+                 helm-gtags helm-lsp helm-org helm-projectile
+                 highlight-parentheses jedi log4j-mode logview
+                 lsp-mode lsp-ui magit move-dup org-download
+                 org-modern org-tree-slide persist plantuml-mode
+                 project-persist projectile smart-mode-line
+                 smart-mode-line-powerline-theme smartparens spaceline
+                 swiper swiper-helm transient treemacs
+                 treemacs-projectile vterm xterm-color yaml-mode
+                 yasnippet yasnippet-snippets)))
 
 (package-initialize)
 
@@ -186,7 +192,9 @@
 ;; (let ((frame-background-mode 'light)) (frame-set-background-mode nil))
 
 ;; ************* COMPANY MODE STUFF ****************
-  (add-hook 'company-mode-hook #'yas-minor-mode)
+(setq company-backends
+      '((company-capf :with company-files company-keywords)))
+(add-hook 'company-mode-hook #'yas-minor-mode)
 
 ;; ************* LINUM STUFF ***********************
 (global-display-line-numbers-mode 1)
@@ -293,7 +301,15 @@
 ;; ************* FORGE STUFF ***********************
 ;; see https://docs.magit.vc/devel/forge/forge.pdf for setup
 (use-package forge
-  :after magit)
+  ;; Point this to the "lisp" subdirectory of your clone
+  :load-path "~/projects/forge/lisp"
+  :after magit
+  :config
+  ;; Any custom forge configuration goes here
+  )
+;; (use-package forge
+;;   :after magit)
+
 (with-eval-after-load 'forge
   (push '("gitlabee.imsar.us"        ; GITHOST
           "gitlabee.imsar.us/api/v4" ; APIHOST
