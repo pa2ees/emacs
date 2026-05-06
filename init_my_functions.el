@@ -1,9 +1,9 @@
-(defun clang-format-enable-this-buffer ()
+(defun evz/clang-format-enable-this-buffer ()
   "Enable clang-formatting on save for this buffer"
   (interactive)
   (add-hook 'before-save-hook #'evz/clang-format-this-buffer nil t))
 
-(defun clang-format-disable-this-buffer ()
+(defun evz/clang-format-disable-this-buffer ()
   "Disable clang-formatting on save for this buffer"
   (interactive)
   (remove-hook 'before-save-hook #'evz/clang-format-this-buffer t))

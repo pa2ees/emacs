@@ -264,9 +264,7 @@
 (global-set-key (kbd "C-c z") #'evz/zoom-toggle)
 
 ;; ************** CLANG-FORMAT *********************
-;; (add-hook 'c-mode-common-hook #'clang-format+-mode)
-;; (add-hook 'c-mode-common-hook (lambda () (clang-format-save-hook-for-this-buffer)))
-(add-hook 'c-mode-common-hook #'clang-format-enable-this-buffer)
+(add-hook 'c-mode-common-hook #'evz/clang-format-enable-this-buffer)
 
 (setq-default tab-width 4)
 
