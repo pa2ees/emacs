@@ -47,11 +47,12 @@
      ("imsar_datetimestamp" (java-pattern . "yyyyMMdd_hh:MM:ss.SSS")
       (datetime-options))))
  '(package-selected-packages
-   '(abyss-theme ag auto-compile clang-format clang-format+ cmake-mode
-                 company company-jedi dired-narrow dired-sidebar
-                 dired-toggle diredfl elpy forge general ggtags
-                 git-messenger gptel graphviz-dot-mode helm helm-ag
-                 helm-gtags helm-lsp helm-org helm-projectile
+   '(abyss-theme ag agent-shell auto-compile clang-format clang-format+
+                 cmake-mode company company-jedi dired-narrow
+                 dired-sidebar dired-toggle diredfl elpy
+                 emacs-mcp-server forge general ggtags git-messenger
+                 gptel graphviz-dot-mode helm helm-ag helm-gtags
+                 helm-lsp helm-org helm-projectile
                  highlight-parentheses jedi log4j-mode logview
                  lsp-mode lsp-ui magit move-dup org-download
                  org-modern org-tree-slide persist plantuml-mode
@@ -59,7 +60,9 @@
                  smart-mode-line-powerline-theme smartparens spaceline
                  swiper swiper-helm transient treemacs
                  treemacs-projectile vterm xterm-color yaml-mode
-                 yasnippet yasnippet-snippets)))
+                 yasnippet yasnippet-snippets))
+ '(package-vc-selected-packages
+   '((emacs-mcp-server :url "https://github.com/rhblind/emacs-mcp-server"))))
 
 (package-initialize)
 
