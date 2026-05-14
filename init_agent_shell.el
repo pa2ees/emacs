@@ -6,7 +6,8 @@
 
 (use-package agent-shell
   :ensure t
-  :bind (("C-c a a" . evz/agent-shell-auto)
+  :bind (("C-c a a" . evz/agent-shell-switch)
+         ("C-c a c" . evz/agent-shell-with-context)
          ("C-c a u" . agent-shell-show-usage)
          ("C-c a s" . evz/emacs-mcp-server-start)
          ("C-c a S" . evz/emacs-mcp-server-stop)
@@ -337,15 +338,22 @@
   (when (derived-mode-p 'agent-shell-mode)
     (add-hook 'kill-buffer-hook #'evz/agent-shell-cleanup nil t)))
 
-(defun evz/agent-shell-auto ()
-  "Start agent-shell, ensuring MCP server and bridge are running."
-  (interactive)
+(defun evz/agent-shell--get-existing-buffer ()
+  "Return the agent-shell buffer if one exists, nil otherwise."
+  (seq-find (lambda (buf)
+              (and (buffer-live-p buf)
+                   (with-current-buffer buf
+                     (derived-mode-p 'agent-shell-mode))))
+            (buffer-list)))
 
-  ;; Check if in project
+(defun evz/agent-shell--check-project ()
+  "Check if in project. Prompt if not."
   (unless (projectile-project-root)
     (unless (y-or-n-p "Not in a project. Really start agent-shell? ")
-      (user-error "Cancelled")))
+      (user-error "Cancelled"))))
 
+(defun evz/agent-shell--ensure-services ()
+  "Ensure MCP server and bridge are running."
   ;; Ensure MCP server is running
   (unless (evz/emacs-mcp-server-running-p)
     (message "Starting MCP server...")
@@ -356,13 +364,42 @@
   (unless (evz/agent-shell-bridge-running-p)
     (message "Starting bridge...")
     (evz/agent-shell-bridge-start)
-    (sit-for 0.5))
+    (sit-for 0.5)))
 
-  ;; Start agent-shell
-  (call-interactively 'agent-shell)
+(defun evz/agent-shell-switch ()
+  "Switch to agent-shell buffer without adding context from current buffer."
+  (interactive)
 
-  ;; Add cleanup hook to the current buffer if it's agent-shell
-  (evz/agent-shell-setup-cleanup-hook))
+  (if-let ((shell-buffer (evz/agent-shell--get-existing-buffer)))
+      ;; Session exists, just switch to it
+      (pop-to-buffer shell-buffer)
+    ;; No session, need to create one
+    (evz/agent-shell--check-project)
+    (evz/agent-shell--ensure-services)
+    (let ((shell-buffer (agent-shell-shell-buffer)))
+      (pop-to-buffer shell-buffer)
+      (evz/agent-shell-setup-cleanup-hook))))
+
+(defun evz/agent-shell-with-context ()
+  "Bring context from current buffer to agent-shell."
+  (interactive)
+
+  (if-let ((shell-buffer (evz/agent-shell--get-existing-buffer)))
+      ;; Session exists, check if current buffer is in project
+      (let ((project-root (projectile-project-root))
+            (buffer-file (buffer-file-name)))
+        (if (and buffer-file project-root
+                 (string-prefix-p project-root buffer-file))
+            ;; In project, add context
+            (call-interactively 'agent-shell)
+          ;; Not in project, just switch without context
+          (pop-to-buffer shell-buffer)
+          (message "Couldn't bring context from a non-project buffer")))
+    ;; No session, need to create one
+    (evz/agent-shell--check-project)
+    (evz/agent-shell--ensure-services)
+    (call-interactively 'agent-shell)
+    (evz/agent-shell-setup-cleanup-hook)))
 
 ;; ============================================================================
 ;; Status Display
