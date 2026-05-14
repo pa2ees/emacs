@@ -15,6 +15,7 @@
          ("C-c a r" . evz/agent-shell-helpers-restart-all)
          ("C-c a l" . evz/aws-sso-login)
          ("C-c a d" . evz/agent-shell-bridge-toggle-debug))
+  :hook (agent-shell-mode . evz/agent-shell-setup-cleanup-hook)
   :config
   (setq agent-shell-anthropic-claude-acp-command
         '("~/.config/claude/claude-acp-engine.sh")))
@@ -322,6 +323,20 @@
   (sit-for 0.5)
   (evz/agent-shell-bridge-start))
 
+(defun evz/agent-shell-cleanup ()
+  "Cleanup function to stop bridge and MCP server when agent-shell buffer is killed."
+  (when (evz/agent-shell-bridge-running-p)
+    (message "Stopping bridge...")
+    (evz/agent-shell-bridge-stop))
+  (when (evz/emacs-mcp-server-running-p)
+    (message "Stopping MCP server...")
+    (evz/emacs-mcp-server-stop)))
+
+(defun evz/agent-shell-setup-cleanup-hook ()
+  "Add cleanup hook to agent-shell-mode buffers."
+  (when (derived-mode-p 'agent-shell-mode)
+    (add-hook 'kill-buffer-hook #'evz/agent-shell-cleanup nil t)))
+
 (defun evz/agent-shell-auto ()
   "Start agent-shell, ensuring MCP server and bridge are running."
   (interactive)
@@ -344,7 +359,10 @@
     (sit-for 0.5))
 
   ;; Start agent-shell
-  (call-interactively 'agent-shell))
+  (call-interactively 'agent-shell)
+
+  ;; Add cleanup hook to the current buffer if it's agent-shell
+  (evz/agent-shell-setup-cleanup-hook))
 
 ;; ============================================================================
 ;; Status Display
