@@ -357,6 +357,8 @@
 ;; ************* LSP-MODE STUFF ********************
 (load-file (concat user-emacs-init-directory "init_lsp-mode.el"))
 
+;; ************* AGENT-SHELL STUFF *****************
+(load-file (concat user-emacs-init-directory "init_agent_shell.el"))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
