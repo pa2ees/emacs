@@ -10,6 +10,10 @@
          ("C-c a c" . evz/agent-shell-with-context)
          ("C-c a u" . agent-shell-show-usage)
          ("C-c a i" . evz/agent-shell-helpers-show-status)
+         ("C-c a h" . agent-shell-usage-history-show-all)
+         ("C-c a 1" . agent-shell-usage-history-show-daily)
+         ("C-c a 7" . agent-shell-usage-history-show-weekly)
+         ("C-c a 3" . agent-shell-usage-history-show-monthly)
          ("C-c a s" . evz/emacs-mcp-server-start)
          ("C-c a S" . evz/emacs-mcp-server-stop)
          ("C-c a b" . evz/agent-shell-bridge-start)
@@ -25,6 +29,14 @@
 (use-package emacs-mcp-server
   :vc (:url "https://github.com/rhblind/emacs-mcp-server")
   :defer t)
+
+;; ============================================================================
+;; Usage History Tracking
+;; ============================================================================
+
+(use-package agent-shell-usage-history
+  :load-path "."
+  :after agent-shell)
 
 ;; ============================================================================
 ;; MCP Bridge - HTTP-to-Unix-Socket Bridge (raw forwarding)
