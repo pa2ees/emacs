@@ -68,10 +68,13 @@ Returns a list of usage records, each with timestamp and usage data."
       (condition-case err
           (with-temp-buffer
             (insert-file-contents agent-shell-usage-history-file)
-            (let ((json-object-type 'alist)
-                  (json-array-type 'list)
-                  (json-key-type 'symbol)
-                  (history (json-read)))
+            (let* ((json-object-type 'alist)
+                   (json-array-type 'list)
+                   (json-key-type 'symbol)
+                   (history (json-read)))
+              ;; Ensure history is a list, not a vector
+              (when (vectorp history)
+                (setq history (append history nil)))
               (agent-shell-usage-history--debug "Loaded %d records from history" (length history))
               history))
         (error
@@ -83,42 +86,52 @@ Returns a list of usage records, each with timestamp and usage data."
 
 (defun agent-shell-usage-history--save-history (history)
   "Save usage HISTORY to disk."
-  (agent-shell-usage-history--debug "Saving %d records to: %s" (length history) agent-shell-usage-history-file)
-  (let ((dir (file-name-directory agent-shell-usage-history-file)))
-    (unless (file-directory-p dir)
-      (agent-shell-usage-history--debug "Creating directory: %s" dir)
-      (make-directory dir t)))
-  (with-temp-file agent-shell-usage-history-file
-    (let ((json-encoding-pretty-print t))
-      (insert (json-encode history))))
-  (agent-shell-usage-history--debug "Save complete"))
+  (condition-case err
+      (progn
+        (agent-shell-usage-history--debug "Saving %d records to: %s" (length history) agent-shell-usage-history-file)
+        (let ((dir (file-name-directory agent-shell-usage-history-file)))
+          (unless (file-directory-p dir)
+            (agent-shell-usage-history--debug "Creating directory: %s" dir)
+            (make-directory dir t)))
+        (with-temp-file agent-shell-usage-history-file
+          (let ((json-encoding-pretty-print t))
+            (insert (json-encode history))))
+        (agent-shell-usage-history--debug "Save complete"))
+    (error
+     (agent-shell-usage-history--debug "Error saving history: %S" err)
+     (message "Error saving usage history: %S" err))))
 
 (defun agent-shell-usage-history--record-usage (usage)
   "Record USAGE data to persistent history.
 USAGE should be an alist with token counts, context, and cost."
-  (agent-shell-usage-history--debug "record-usage called with: %S" usage)
-  (if (not usage)
-      (agent-shell-usage-history--debug "No usage data provided, skipping")
-    (let ((total-tokens (or (map-elt usage :total-tokens) 0)))
-      (if (<= total-tokens 0)
-          (agent-shell-usage-history--debug "Total tokens is %d, skipping record" total-tokens)
-        (let* ((history (or (agent-shell-usage-history--load-history) '()))
-               (timestamp (format-time-string "%Y-%m-%dT%H:%M:%S"))
-               (record (list (cons 'timestamp timestamp)
-                            (cons 'total_tokens (or (map-elt usage :total-tokens) 0))
-                            (cons 'input_tokens (or (map-elt usage :input-tokens) 0))
-                            (cons 'output_tokens (or (map-elt usage :output-tokens) 0))
-                            (cons 'thought_tokens (or (map-elt usage :thought-tokens) 0))
-                            (cons 'cached_read_tokens (or (map-elt usage :cached-read-tokens) 0))
-                            (cons 'cached_write_tokens (or (map-elt usage :cached-write-tokens) 0))
-                            (cons 'context_used (or (map-elt usage :context-used) 0))
-                            (cons 'context_size (or (map-elt usage :context-size) 0))
-                            (cons 'cost_amount (or (map-elt usage :cost-amount) 0))
-                            (cons 'cost_currency (or (map-elt usage :cost-currency) "USD")))))
-          (agent-shell-usage-history--debug "Recording usage: tokens=%d timestamp=%s" total-tokens timestamp)
-          (push record history)
-          (agent-shell-usage-history--save-history history)
-          (agent-shell-usage-history--debug "Usage recorded successfully"))))))
+  (condition-case err
+      (progn
+        (agent-shell-usage-history--debug "record-usage called with: %S" usage)
+        (if (not usage)
+            (agent-shell-usage-history--debug "No usage data provided, skipping")
+          (let ((total-tokens (or (map-elt usage :total-tokens) 0)))
+            (if (<= total-tokens 0)
+                (agent-shell-usage-history--debug "Total tokens is %d, skipping record" total-tokens)
+              (let* ((history (or (agent-shell-usage-history--load-history) '()))
+                     (timestamp (format-time-string "%Y-%m-%dT%H:%M:%S"))
+                     (record (list (cons 'timestamp timestamp)
+                                  (cons 'total_tokens (or (map-elt usage :total-tokens) 0))
+                                  (cons 'input_tokens (or (map-elt usage :input-tokens) 0))
+                                  (cons 'output_tokens (or (map-elt usage :output-tokens) 0))
+                                  (cons 'thought_tokens (or (map-elt usage :thought-tokens) 0))
+                                  (cons 'cached_read_tokens (or (map-elt usage :cached-read-tokens) 0))
+                                  (cons 'cached_write_tokens (or (map-elt usage :cached-write-tokens) 0))
+                                  (cons 'context_used (or (map-elt usage :context-used) 0))
+                                  (cons 'context_size (or (map-elt usage :context-size) 0))
+                                  (cons 'cost_amount (or (map-elt usage :cost-amount) 0))
+                                  (cons 'cost_currency (or (map-elt usage :cost-currency) "USD")))))
+                (agent-shell-usage-history--debug "Recording usage: tokens=%d timestamp=%s" total-tokens timestamp)
+                (push record history)
+                (agent-shell-usage-history--save-history history)
+                (agent-shell-usage-history--debug "Usage recorded successfully"))))))
+    (error
+     (agent-shell-usage-history--debug "Error in record-usage: %S" err)
+     (message "Error recording usage history: %S" err))))
 
 (defun agent-shell-usage-history--maybe-save ()
   "Save current session usage if it has changed.
@@ -307,12 +320,18 @@ PERIOD can be 'day, 'week, or 'month."
 (defun agent-shell-usage-history--on-turn-complete (event-data)
   "Handle turn-complete event and save usage.
 EVENT-DATA is an alist with :event and :data."
-  (agent-shell-usage-history--debug "turn-complete event received")
-  (agent-shell-usage-history--debug "event-data: %S" event-data)
-  (if-let* ((data (map-elt event-data :data))
-            (usage (map-elt data :usage)))
-      (agent-shell-usage-history--record-usage usage)
-    (agent-shell-usage-history--debug "No usage data found in event-data")))
+  (condition-case err
+      (progn
+        (agent-shell-usage-history--debug "turn-complete event received")
+        (agent-shell-usage-history--debug "event-data type: %S" (type-of event-data))
+        (agent-shell-usage-history--debug "event-data: %S" event-data)
+        (if-let* ((data (map-elt event-data :data))
+                  (usage (map-elt data :usage)))
+            (agent-shell-usage-history--record-usage usage)
+          (agent-shell-usage-history--debug "No usage data found in event-data")))
+    (error
+     (agent-shell-usage-history--debug "Error in on-turn-complete: %S" err)
+     (message "Error in usage history turn-complete handler: %S" err))))
 
 (defvar-local agent-shell-usage-history--subscription-token nil
   "Subscription token for this buffer's turn-complete handler.")
