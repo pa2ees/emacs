@@ -42,19 +42,6 @@
   :type 'directory
   :group 'agent-shell)
 
-;; Legacy variable for backwards compatibility
-(defcustom agent-shell-usage-history-file
-  (expand-file-name "agent-shell-usage-history.json"
-                    (or (getenv "XDG_DATA_HOME")
-                        (expand-file-name ".local/share" "~")))
-  "Legacy file path for persistent usage history storage.
-This is kept for backwards compatibility with old data."
-  :type 'file
-  :group 'agent-shell)
-
-(defvar agent-shell-usage-history--last-saved-usage nil
-  "Last saved usage data to avoid duplicate writes.")
-
 (defvar agent-shell-usage-history-debug nil
   "When non-nil, output debug messages to the usage history debug buffer.")
 
@@ -112,35 +99,15 @@ Returns a list of usage records."
 (defun agent-shell-usage-history--load-history ()
   "Load usage history from disk.
 Returns a list of usage records, each with timestamp and usage data."
-  ;; First try to load from legacy file
-  (let ((legacy-history nil))
-    (when (file-exists-p agent-shell-usage-history-file)
-      (agent-shell-usage-history--debug "Loading legacy history from: %s" agent-shell-usage-history-file)
-      (condition-case err
-          (with-temp-buffer
-            (insert-file-contents agent-shell-usage-history-file)
-            (let* ((json-object-type 'alist)
-                   (json-array-type 'list)
-                   (json-key-type 'symbol)
-                   (history (json-read)))
-              ;; Ensure history is a list, not a vector
-              (when (vectorp history)
-                (setq history (append history nil)))
-              (setq legacy-history history)
-              (agent-shell-usage-history--debug "Loaded %d records from legacy file" (length history))))
-        (error
-         (agent-shell-usage-history--debug "Error loading legacy history: %s" err))))
-
-    ;; Load from new weekly files
-    (let ((week-files (when (file-directory-p agent-shell-usage-history-directory)
-                        (directory-files agent-shell-usage-history-directory t "^usage-.*\\.jsonl$")))
-          (all-records legacy-history))
-      (dolist (file week-files)
-        (agent-shell-usage-history--debug "Loading week file: %s" file)
-        (let ((records (agent-shell-usage-history--load-week-file file)))
-          (setq all-records (append all-records records))))
-      (agent-shell-usage-history--debug "Loaded %d total records" (length all-records))
-      all-records)))
+  (let ((week-files (when (file-directory-p agent-shell-usage-history-directory)
+                      (directory-files agent-shell-usage-history-directory t "^usage-.*\\.jsonl$")))
+        (all-records nil))
+    (dolist (file week-files)
+      (agent-shell-usage-history--debug "Loading week file: %s" file)
+      (let ((records (agent-shell-usage-history--load-week-file file)))
+        (setq all-records (append all-records records))))
+    (agent-shell-usage-history--debug "Loaded %d total records" (length all-records))
+    all-records))
 
 (defun agent-shell-usage-history--append-to-week-file (record)
   "Append a single RECORD to the appropriate weekly JSONL file.
@@ -184,23 +151,6 @@ Uses file locking and retries to handle concurrent writes safely."
      (agent-shell-usage-history--debug "Error appending to week file: %S" err)
      (message "Error saving usage history: %S" err))))
 
-;; Keep old function for backwards compatibility (used by export/clear functions)
-(defun agent-shell-usage-history--save-history (history)
-  "Save usage HISTORY to disk (legacy function, kept for compatibility)."
-  (condition-case err
-      (progn
-        (agent-shell-usage-history--debug "Saving %d records to: %s" (length history) agent-shell-usage-history-file)
-        (let ((dir (file-name-directory agent-shell-usage-history-file)))
-          (unless (file-directory-p dir)
-            (agent-shell-usage-history--debug "Creating directory: %s" dir)
-            (make-directory dir t)))
-        (with-temp-file agent-shell-usage-history-file
-          (let ((json-encoding-pretty-print t))
-            (insert (json-encode history))))
-        (agent-shell-usage-history--debug "Save complete"))
-    (error
-     (agent-shell-usage-history--debug "Error saving history: %S" err)
-     (message "Error saving usage history: %S" err))))
 
 (defun agent-shell-usage-history--record-usage (usage)
   "Record USAGE data to persistent history.
@@ -232,17 +182,6 @@ USAGE should be an alist with token counts, context, and cost."
      (agent-shell-usage-history--debug "Error in record-usage: %S" err)
      (message "Error recording usage history: %S" err))))
 
-(defun agent-shell-usage-history--maybe-save ()
-  "Save current session usage if it has changed.
-Should be called after each agent turn."
-  (when (derived-mode-p 'agent-shell-mode)
-    (when-let* ((usage (map-elt agent-shell--state :usage))
-                (total (map-elt usage :total-tokens))
-                ((> total 0))
-                ((or (null agent-shell-usage-history--last-saved-usage)
-                     (not (equal total (map-elt agent-shell-usage-history--last-saved-usage :total-tokens))))))
-      (agent-shell-usage-history--record-usage usage)
-      (setq agent-shell-usage-history--last-saved-usage usage))))
 
 (defun agent-shell-usage-history--parse-date (timestamp)
   "Parse TIMESTAMP string to time value."
@@ -370,18 +309,32 @@ PERIOD can be 'day, 'week, or 'month."
     (pop-to-buffer buf)))
 
 (defun agent-shell-usage-history-clear-old (days)
-  "Remove usage records older than DAYS from history."
+  "Remove usage records older than DAYS from history.
+Deletes old weekly JSONL files."
   (interactive "nKeep records from last N days: ")
   (let* ((cutoff-time (time-subtract (current-time) (days-to-time days)))
-         (history (agent-shell-usage-history--load-history))
-         (filtered (agent-shell-usage-history--filter-by-period history cutoff-time))
-         (removed-count (- (length history) (length filtered))))
-    (if (> removed-count 0)
-        (progn
-          (agent-shell-usage-history--save-history filtered)
-          (message "Removed %d old record(s), kept %d record(s) from last %d days"
-                   removed-count (length filtered) days))
-      (message "No records older than %d days" days))))
+         (week-files (when (file-directory-p agent-shell-usage-history-directory)
+                       (directory-files agent-shell-usage-history-directory t "^usage-.*\\.jsonl$")))
+         (deleted-count 0)
+         (kept-count 0))
+    (dolist (file week-files)
+      ;; Check if file has any records newer than cutoff
+      (let* ((records (agent-shell-usage-history--load-week-file file))
+             (has-recent (seq-some
+                         (lambda (record)
+                           (let ((record-time (agent-shell-usage-history--parse-date
+                                              (map-elt record 'timestamp))))
+                             (time-less-p cutoff-time record-time)))
+                         records)))
+        (if has-recent
+            (cl-incf kept-count)
+          (progn
+            (delete-file file)
+            (cl-incf deleted-count)
+            (agent-shell-usage-history--debug "Deleted old file: %s" file)))))
+    (if (> deleted-count 0)
+        (message "Deleted %d old file(s), kept %d file(s)" deleted-count kept-count)
+      (message "No files older than %d days" days))))
 
 (defun agent-shell-usage-history-export ()
   "Export usage history to a CSV file."
