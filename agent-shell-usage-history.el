@@ -246,36 +246,86 @@ PERIOD can be 'day, 'week, or 'month."
         (agent-shell-usage-history--aggregate-usage filtered)
       nil)))
 
+(defun agent-shell-usage-history--abbreviate-project (project-root)
+  "Abbreviate PROJECT-ROOT for display (e.g., /home/user/projects/foo -> ~/projects/foo)."
+  (if project-root
+      (abbreviate-file-name project-root)
+    "unknown"))
+
+(defun agent-shell-usage-history--get-today-records ()
+  "Get all records from today, grouped by project."
+  (let* ((history (agent-shell-usage-history--load-history))
+         (now (current-time))
+         (decoded (decode-time now))
+         (today-start (encode-time 0 0 0
+                                  (nth 3 decoded)  ; day
+                                  (nth 4 decoded)  ; month
+                                  (nth 5 decoded)  ; year
+                                  (nth 8 decoded))) ; timezone
+         (today-records (agent-shell-usage-history--filter-by-period history today-start))
+         (by-project (make-hash-table :test 'equal)))
+    ;; Group by project
+    (dolist (record today-records)
+      (let* ((project (or (map-elt record 'project_root) "unknown"))
+             (existing (gethash project by-project)))
+        (puthash project (cons record existing) by-project)))
+    by-project))
+
+(defun agent-shell-usage-history--format-today-sessions ()
+  "Format today's sessions grouped by project."
+  (let ((by-project (agent-shell-usage-history--get-today-records))
+        (output ""))
+    (setq output (concat output
+                        (propertize (format "=== Today (%s) ===\n"
+                                          (format-time-string "%Y-%m-%d"))
+                                   'face 'bold)))
+    (if (zerop (hash-table-count by-project))
+        (setq output (concat output "No sessions today\n"))
+      (maphash
+       (lambda (project records)
+         (let* ((sorted-records (sort records
+                                    (lambda (a b)
+                                      (string< (map-elt b 'timestamp)
+                                              (map-elt a 'timestamp)))))
+                (project-total 0)
+                (project-cost 0.0))
+           (setq output (concat output
+                               (format "%s (%d session%s):\n"
+                                      (agent-shell-usage-history--abbreviate-project project)
+                                      (length records)
+                                      (if (= (length records) 1) "" "s"))))
+           (dolist (record sorted-records)
+             (let* ((timestamp (map-elt record 'timestamp))
+                    (time-only (substring timestamp 11 19))
+                    (tokens (or (map-elt record 'total_tokens) 0))
+                    (cost (or (map-elt record 'cost_amount) 0.0)))
+               (cl-incf project-total tokens)
+               (cl-incf project-cost cost)
+               (setq output (concat output
+                                   (format "  %s  %6s  $%.2f\n"
+                                          time-only
+                                          (agent-shell--format-number-compact tokens)
+                                          cost)))))
+           (setq output (concat output
+                               (format "  Total: %s, $%.2f\n\n"
+                                      (agent-shell--format-number-compact project-total)
+                                      project-cost)))))
+       by-project))
+    output))
+
 (defun agent-shell-usage-history--format-stats (stats period-name)
   "Format STATS for display with PERIOD-NAME label."
   (if (null stats)
       (format "No usage data for %s" period-name)
     (let* ((sessions (plist-get stats :session-count))
            (total (plist-get stats :total-tokens))
-           (input (plist-get stats :input-tokens))
-           (output (plist-get stats :output-tokens))
-           (thought (plist-get stats :thought-tokens))
-           (cached (plist-get stats :cached-read-tokens))
            (cost (plist-get stats :cost-amount))
            (currency (plist-get stats :cost-currency)))
-      (concat
-       (propertize (format "=== %s Usage ===" period-name)
-                   'face 'bold)
-       "\n"
-       (format "Sessions: %d\n" sessions)
-       (format "Total tokens: %s\n"
-               (agent-shell--format-number-compact total))
-       (format "  Input: %s\n"
-               (agent-shell--format-number-compact input))
-       (format "  Output: %s\n"
-               (agent-shell--format-number-compact output))
-       (when (> thought 0)
-         (format "  Thought: %s\n"
-                 (agent-shell--format-number-compact thought)))
-       (when (> cached 0)
-         (format "  Cached read: %s\n"
-                 (agent-shell--format-number-compact cached)))
-       (format "Cost: %s%.2f\n" currency cost)))))
+      (format "Sessions: %d | Total: %s | Cost: %s%.2f"
+              sessions
+              (agent-shell--format-number-compact total)
+              currency
+              cost))))
 
 (defun agent-shell-usage-history-show-daily ()
   "Show usage statistics for the last 24 hours."
@@ -305,12 +355,19 @@ PERIOD can be 'day, 'week, or 'month."
     (with-current-buffer buf
       (let ((inhibit-read-only t))
         (erase-buffer)
+        ;; Today's sessions grouped by project
+        (insert (agent-shell-usage-history--format-today-sessions))
+        (insert "\n")
+        ;; Period summaries
+        (insert (propertize "=== Last 24 Hours ===\n" 'face 'bold))
         (insert (agent-shell-usage-history--format-stats daily "Last 24 Hours"))
-        (insert "\n")
+        (insert "\n\n")
+        (insert (propertize "=== Last 7 Days ===\n" 'face 'bold))
         (insert (agent-shell-usage-history--format-stats weekly "Last 7 Days"))
-        (insert "\n")
+        (insert "\n\n")
+        (insert (propertize "=== Last 30 Days ===\n" 'face 'bold))
         (insert (agent-shell-usage-history--format-stats monthly "Last 30 Days"))
-        (insert "\n")
+        (insert "\n\n")
         (insert (propertize "Press q to close" 'face 'font-lock-comment-face))
         (goto-char (point-min))
         (view-mode 1)))
