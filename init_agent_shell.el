@@ -10,10 +10,6 @@
          ("C-c a c" . evz/agent-shell-with-context)
          ("C-c a u" . agent-shell-show-usage)
          ("C-c a i" . evz/agent-shell-helpers-show-status)
-         ("C-c a h" . agent-shell-usage-history-show-all)
-         ("C-c a 1" . agent-shell-usage-history-show-daily)
-         ("C-c a 7" . agent-shell-usage-history-show-weekly)
-         ("C-c a 3" . agent-shell-usage-history-show-monthly)
          ("C-c a s" . evz/emacs-mcp-server-start)
          ("C-c a S" . evz/emacs-mcp-server-stop)
          ("C-c a b" . evz/agent-shell-bridge-start)
@@ -33,10 +29,11 @@
 ;; ============================================================================
 ;; Usage History Tracking
 ;; ============================================================================
+(load-file (concat user-emacs-init-directory "agent-shell-usage-history.el"))
+(require 'agent-shell-usage-history)
 
-(use-package agent-shell-usage-history
-  :load-path "."
-  :after agent-shell)
+;; Bind the usage history prefix key
+(define-key global-map (kbd "C-c a U") agent-shell-usage-history-map)
 
 ;; ============================================================================
 ;; MCP Bridge - HTTP-to-Unix-Socket Bridge (raw forwarding)
