@@ -525,15 +525,18 @@ Deletes old weekly JSONL files."
     (if (null history)
         (message "No usage history to export")
       (with-temp-file filename
-        (insert "timestamp,total_tokens,input_tokens,output_tokens,thought_tokens,cached_read_tokens,context_used,context_size,cost_amount,cost_currency\n")
+        (insert "timestamp,session_id,project_root,total_tokens,input_tokens,output_tokens,thought_tokens,cached_read_tokens,cached_write_tokens,context_used,context_size,cost_amount,cost_currency\n")
         (dolist (record history)
-          (insert (format "%s,%d,%d,%d,%d,%d,%d,%d,%.4f,%s\n"
+          (insert (format "%s,%s,%s,%d,%d,%d,%d,%d,%d,%d,%d,%.4f,%s\n"
                           (map-elt record 'timestamp)
+                          (or (map-elt record 'session_id) "")
+                          (or (map-elt record 'project_root) "")
                           (or (map-elt record 'total_tokens) 0)
                           (or (map-elt record 'input_tokens) 0)
                           (or (map-elt record 'output_tokens) 0)
                           (or (map-elt record 'thought_tokens) 0)
                           (or (map-elt record 'cached_read_tokens) 0)
+                          (or (map-elt record 'cached_write_tokens) 0)
                           (or (map-elt record 'context_used) 0)
                           (or (map-elt record 'context_size) 0)
                           (or (map-elt record 'cost_amount) 0.0)
