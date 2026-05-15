@@ -279,6 +279,54 @@ PERIOD can be 'day, 'week, or 'month."
       (abbreviate-file-name project-root)
     "unknown"))
 
+(defun agent-shell-usage-history--format-current-session ()
+  "Format current session usage statistics."
+  (let ((output ""))
+    (setq output (concat output
+                        (propertize "=== Current Session ===\n" 'face 'bold)))
+    ;; Find the agent-shell buffer
+    (let ((agent-shell-buffer (seq-find (lambda (buf)
+                                          (with-current-buffer buf
+                                            (derived-mode-p 'agent-shell-mode)))
+                                        (buffer-list))))
+      (if agent-shell-buffer
+          (with-current-buffer agent-shell-buffer
+            (let* ((usage (map-elt agent-shell--state :usage))
+                   (total-tokens (or (map-elt usage :total-tokens) 0))
+                   (input-tokens (or (map-elt usage :input-tokens) 0))
+                   (output-tokens (or (map-elt usage :output-tokens) 0))
+                   (thought-tokens (or (map-elt usage :thought-tokens) 0))
+                   (cached-read-tokens (or (map-elt usage :cached-read-tokens) 0))
+                   (context-used (or (map-elt usage :context-used) 0))
+                   (context-size (or (map-elt usage :context-size) 0))
+                   (cost (or (map-elt usage :cost-amount) 0))
+                   (currency (or (map-elt usage :cost-currency) "USD"))
+                   (session-id agent-shell-usage-history--session-id)
+                   (project agent-shell-usage-history--project-root))
+              (setq output (concat output
+                                  (format "Session: %s\n"
+                                         (agent-shell-usage-history--get-session-id-suffix session-id))
+                                  (format "Project: %s\n"
+                                         (agent-shell-usage-history--abbreviate-project project))
+                                  (format "Total tokens: %s (cached: %s)\n"
+                                         (agent-shell--format-number-compact total-tokens)
+                                         (agent-shell--format-number-compact cached-read-tokens))
+                                  (format "  in: %s, out: %s\n"
+                                         (agent-shell--format-number-compact input-tokens)
+                                         (agent-shell--format-number-compact output-tokens))
+                                  (when (> thought-tokens 0)
+                                    (format "Thought tokens: %s\n"
+                                           (agent-shell--format-number-compact thought-tokens)))
+                                  (format "Context: %s / %s (%.1f%%)\n"
+                                         (agent-shell--format-number-compact context-used)
+                                         (agent-shell--format-number-compact context-size)
+                                         (if (> context-size 0)
+                                             (* 100.0 (/ (float context-used) context-size))
+                                           0.0))
+                                  (format "Cost: $%.2f\n" cost)))))
+        (setq output (concat output "No active agent-shell session\n"))))
+    (concat output "\n")))
+
 (defun agent-shell-usage-history--get-today-records ()
   "Get all records from today, grouped by project."
   (let* ((history (agent-shell-usage-history--load-history))
@@ -357,21 +405,20 @@ PERIOD can be 'day, 'week, or 'month."
 
       ;; Display table header
       (setq output (concat output
-                          (format "%-10s %8s %8s %10s %6s  %s\n"
-                                 "Session" "In" "Out" "Cost" "Turns" "Project")
+                          (format "%-10s %10s %10s %6s  %s\n"
+                                 "Session" "Tokens" "Cost" "Turns" "Project")
                           (format "%s\n"
                                  (make-string 70 ?-))))
 
       ;; Display each session
       (dolist (session all-sessions)
         (setq output (concat output
-                            (format "%-10s %8s %8s %10s %6d  %s\n"
+                            (format "%-10s %10s %10s %6d  %s\n"
                                    (agent-shell-usage-history--get-session-id-suffix
                                     (plist-get session :session-id))
                                    (agent-shell--format-number-compact
-                                    (plist-get session :input))
-                                   (agent-shell--format-number-compact
-                                    (plist-get session :output))
+                                    (+ (plist-get session :input)
+                                       (plist-get session :output)))
                                    (format "$%.2f" (plist-get session :cost))
                                    (plist-get session :turns)
                                    (agent-shell-usage-history--abbreviate-project
@@ -386,12 +433,10 @@ PERIOD can be 'day, 'week, or 'month."
       (format "No usage data for %s" period-name)
     (let* ((sessions (plist-get stats :session-count))
            (total (plist-get stats :total-tokens))
-           (cost (plist-get stats :cost-amount))
-           (currency (plist-get stats :cost-currency)))
-      (format "Sessions: %d | Total: %s | Cost: %s%.2f"
+           (cost (plist-get stats :cost-amount)))
+      (format "Sessions: %d | Total: %s | Cost: $%.2f"
               sessions
               (agent-shell--format-number-compact total)
-              currency
               cost))))
 
 (defun agent-shell-usage-history-show-daily ()
@@ -422,6 +467,8 @@ PERIOD can be 'day, 'week, or 'month."
     (with-current-buffer buf
       (let ((inhibit-read-only t))
         (erase-buffer)
+        ;; Current session
+        (insert (agent-shell-usage-history--format-current-session))
         ;; Today's sessions grouped by project
         (insert (agent-shell-usage-history--format-today-sessions))
         (insert "\n")
