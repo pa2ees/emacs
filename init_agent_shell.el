@@ -143,15 +143,32 @@
 
       (evz/agent-shell-bridge--debug "[SOCK] sending request")
 
-      ;; Send request
+      ;; Send request (no EOF needed - each NDJSON message is complete)
       (process-send-string sock-proc request-data)
 
-      ;; Signal end-of-request
-      (process-send-eof sock-proc)
-
-      ;; Wait for response (blocking, but simple)
-      (while (process-live-p sock-proc)
-        (accept-process-output sock-proc 0.1))
+      ;; Wait for response with 30 second timeout (allows time for permission prompts)
+      ;; Keep reading even after process dies, as data may still be buffered
+      (evz/agent-shell-bridge--debug "[SOCK] starting wait loop with 30s timeout")
+      (let ((timeout-time (+ (float-time) 30.0))
+            (got-data nil)
+            (last-status "alive"))
+        (while (and (< (float-time) timeout-time)
+                    (not got-data))
+          (let ((status (if (process-live-p sock-proc) "alive" "dead"))
+                (buf-size (with-current-buffer sock-buffer (buffer-size))))
+            (when (not (equal status last-status))
+              (evz/agent-shell-bridge--debug "[SOCK] process status changed: %s -> %s, buffer size: %d"
+                                            last-status status buf-size)
+              (setq last-status status))
+            (accept-process-output sock-proc 0.1)
+            ;; Check if we've received any data
+            (when (> buf-size 0)
+              (evz/agent-shell-bridge--debug "[SOCK] got data! buffer size: %d" buf-size)
+              (setq got-data t))))
+        (evz/agent-shell-bridge--debug "[SOCK] finished waiting: got-data=%s process-alive=%s buffer-size=%d"
+                                      got-data
+                                      (process-live-p sock-proc)
+                                      (with-current-buffer sock-buffer (buffer-size))))
 
       ;; Read NDJSON response as raw strings
       (let* ((lines (evz/agent-shell-bridge--read-ndjson-raw sock-proc))
@@ -173,6 +190,9 @@
           ;; Close the connection gracefully - sentinel will clean up buffer
           (delete-process client-proc))
 
+        ;; Clean up socket process and buffer
+        (when (process-live-p sock-proc)
+          (delete-process sock-proc))
         (kill-buffer sock-buffer)))))
 
 (defun evz/agent-shell-bridge--parse-http-request (data)
