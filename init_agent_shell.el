@@ -130,45 +130,63 @@
     (unless (string-suffix-p "\n" request-data)
       (setq request-data (concat request-data "\n")))
 
-    (evz/agent-shell-bridge--debug "[SOCK] connecting to %s" evz/agent-shell-bridge-sock-path)
+    ;; Check if this is a notification (no response expected)
+    (let* ((json-object-type 'alist)
+           (json-key-type 'symbol)
+           (request-obj (condition-case nil
+                            (json-read-from-string request-data)
+                          (error nil)))
+           (is-notification (and request-obj (not (map-elt request-obj 'id)))))
 
-    ;; Create Unix socket connection
-    (let* ((sock-buffer (generate-new-buffer " *mcp-bridge-sock*"))
-           (sock-proc (make-network-process
-                       :name "mcp-bridge-sock"
-                       :buffer sock-buffer
-                       :family 'local
-                       :service evz/agent-shell-bridge-sock-path
-                       :sentinel #'ignore)))
+      (when is-notification
+        (evz/agent-shell-bridge--debug "[NOTIF] Detected notification, will not wait for response"))
 
-      (evz/agent-shell-bridge--debug "[SOCK] sending request")
+      (evz/agent-shell-bridge--debug "[SOCK] connecting to %s" evz/agent-shell-bridge-sock-path)
 
-      ;; Send request (no EOF needed - each NDJSON message is complete)
-      (process-send-string sock-proc request-data)
+      ;; Create Unix socket connection
+      (let* ((sock-buffer (generate-new-buffer " *mcp-bridge-sock*"))
+             (sock-proc (make-network-process
+                         :name "mcp-bridge-sock"
+                         :buffer sock-buffer
+                         :family 'local
+                         :service evz/agent-shell-bridge-sock-path
+                         :sentinel #'ignore)))
 
-      ;; Wait for response with 30 second timeout (allows time for permission prompts)
-      ;; Keep reading even after process dies, as data may still be buffered
-      (evz/agent-shell-bridge--debug "[SOCK] starting wait loop with 30s timeout")
-      (let ((timeout-time (+ (float-time) 30.0))
-            (got-data nil)
-            (last-status "alive"))
-        (while (and (< (float-time) timeout-time)
-                    (not got-data))
-          (let ((status (if (process-live-p sock-proc) "alive" "dead"))
-                (buf-size (with-current-buffer sock-buffer (buffer-size))))
-            (when (not (equal status last-status))
-              (evz/agent-shell-bridge--debug "[SOCK] process status changed: %s -> %s, buffer size: %d"
-                                            last-status status buf-size)
-              (setq last-status status))
-            (accept-process-output sock-proc 0.1)
-            ;; Check if we've received any data
-            (when (> buf-size 0)
-              (evz/agent-shell-bridge--debug "[SOCK] got data! buffer size: %d" buf-size)
-              (setq got-data t))))
-        (evz/agent-shell-bridge--debug "[SOCK] finished waiting: got-data=%s process-alive=%s buffer-size=%d"
-                                      got-data
-                                      (process-live-p sock-proc)
-                                      (with-current-buffer sock-buffer (buffer-size))))
+        (evz/agent-shell-bridge--debug "[SOCK] sending request")
+
+        ;; Send request (no EOF needed - each NDJSON message is complete)
+        (process-send-string sock-proc request-data)
+
+        ;; Wait for response (skip for notifications)
+        (if is-notification
+            (progn
+              (evz/agent-shell-bridge--debug "[NOTIF] Skipping wait for notification")
+              ;; Give MCP server a moment to process
+              (sit-for 0.05))
+          ;; Regular request: wait for response with 30 second timeout
+          (evz/agent-shell-bridge--debug "[SOCK] starting wait loop with 30s timeout")
+          (let ((timeout-time (+ (float-time) 30.0))
+                (got-data nil)
+                (last-status "alive"))
+            (while (and (< (float-time) timeout-time)
+                        (not got-data))
+              (let ((status (if (process-live-p sock-proc) "alive" "dead"))
+                    (buf-size (with-current-buffer sock-buffer (buffer-size))))
+                (when (not (equal status last-status))
+                  (evz/agent-shell-bridge--debug "[SOCK] process status changed: %s -> %s, buffer size: %d"
+                                                last-status status buf-size)
+                  (setq last-status status))
+                ;; Use sit-for instead of accept-process-output to keep Emacs responsive
+                (sit-for 0.1)
+                (accept-process-output sock-proc 0 nil t)
+                ;; Check if we've received any data
+                (when (> buf-size 0)
+                  (evz/agent-shell-bridge--debug "[SOCK] got data! buffer size: %d" buf-size)
+                  (setq got-data t))))
+            (evz/agent-shell-bridge--debug "[SOCK] finished waiting: got-data=%s process-alive=%s buffer-size=%d"
+                                          got-data
+                                          (process-live-p sock-proc)
+                                          (with-current-buffer sock-buffer (buffer-size)))))
 
       ;; Read NDJSON response as raw strings
       (let* ((lines (evz/agent-shell-bridge--read-ndjson-raw sock-proc))
@@ -193,7 +211,7 @@
         ;; Clean up socket process and buffer
         (when (process-live-p sock-proc)
           (delete-process sock-proc))
-        (kill-buffer sock-buffer)))))
+        (kill-buffer sock-buffer))))))
 
 (defun evz/agent-shell-bridge--parse-http-request (data)
   "Parse HTTP request DATA and return the body."
