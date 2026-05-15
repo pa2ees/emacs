@@ -212,7 +212,7 @@ USAGE should be an alist with token counts, context, and cost."
         (cached-read-tokens 0)
         (total-cost 0)
         (currency "USD")
-        (session-count (length records)))
+        (unique-sessions (make-hash-table :test 'equal)))
     (dolist (record records)
       (cl-incf total-tokens (or (map-elt record 'total_tokens) 0))
       (cl-incf input-tokens (or (map-elt record 'input_tokens) 0))
@@ -221,7 +221,10 @@ USAGE should be an alist with token counts, context, and cost."
       (cl-incf cached-read-tokens (or (map-elt record 'cached_read_tokens) 0))
       (cl-incf total-cost (or (map-elt record 'cost_amount) 0))
       (when-let ((cur (map-elt record 'cost_currency)))
-        (setq currency cur)))
+        (setq currency cur))
+      ;; Track unique session IDs
+      (when-let ((session-id (map-elt record 'session_id)))
+        (puthash session-id t unique-sessions)))
     (list :total-tokens total-tokens
           :input-tokens input-tokens
           :output-tokens output-tokens
@@ -229,7 +232,7 @@ USAGE should be an alist with token counts, context, and cost."
           :cached-read-tokens cached-read-tokens
           :cost-amount total-cost
           :cost-currency currency
-          :session-count session-count)))
+          :session-count (hash-table-count unique-sessions))))
 
 (defun agent-shell-usage-history--get-period-stats (period)
   "Get usage statistics for PERIOD.
@@ -271,46 +274,86 @@ PERIOD can be 'day, 'week, or 'month."
         (puthash project (cons record existing) by-project)))
     by-project))
 
+(defun agent-shell-usage-history--get-session-id-suffix (session-id)
+  "Get the last part of SESSION-ID (after the last dash)."
+  (if (and session-id (string-match "-\\([^-]+\\)$" session-id))
+      (match-string 1 session-id)
+    (or session-id "unknown")))
+
 (defun agent-shell-usage-history--format-today-sessions ()
-  "Format today's sessions grouped by project."
+  "Format today's sessions in a table sorted by project."
   (let ((by-project (agent-shell-usage-history--get-today-records))
-        (output ""))
+        (output "")
+        (all-sessions '()))
     (setq output (concat output
                         (propertize (format "=== Today (%s) ===\n"
                                           (format-time-string "%Y-%m-%d"))
                                    'face 'bold)))
     (if (zerop (hash-table-count by-project))
         (setq output (concat output "No sessions today\n"))
+      ;; Collect all sessions with their project info
       (maphash
        (lambda (project records)
-         (let* ((sorted-records (sort records
-                                    (lambda (a b)
-                                      (string< (map-elt b 'timestamp)
-                                              (map-elt a 'timestamp)))))
-                (project-total 0)
-                (project-cost 0.0))
-           (setq output (concat output
-                               (format "%s (%d session%s):\n"
-                                      (agent-shell-usage-history--abbreviate-project project)
-                                      (length records)
-                                      (if (= (length records) 1) "" "s"))))
-           (dolist (record sorted-records)
-             (let* ((timestamp (map-elt record 'timestamp))
-                    (time-only (substring timestamp 11 19))
-                    (tokens (or (map-elt record 'total_tokens) 0))
-                    (cost (or (map-elt record 'cost_amount) 0.0)))
-               (cl-incf project-total tokens)
-               (cl-incf project-cost cost)
-               (setq output (concat output
-                                   (format "  %s  %6s  $%.2f\n"
-                                          time-only
-                                          (agent-shell--format-number-compact tokens)
-                                          cost)))))
-           (setq output (concat output
-                               (format "  Total: %s, $%.2f\n\n"
-                                      (agent-shell--format-number-compact project-total)
-                                      project-cost)))))
-       by-project))
+         ;; Group records by session_id
+         (let ((by-session (make-hash-table :test 'equal)))
+           (dolist (record records)
+             (let* ((session-id (or (map-elt record 'session_id) "unknown"))
+                    (existing (gethash session-id by-session)))
+               (puthash session-id (cons record existing) by-session)))
+
+           ;; Collect session data
+           (maphash
+            (lambda (session-id session-records)
+              (let ((session-input 0)
+                    (session-output 0)
+                    (session-cost 0.0)
+                    (turn-count (length session-records)))
+                ;; Aggregate session data
+                (dolist (record session-records)
+                  (cl-incf session-input (or (map-elt record 'input_tokens) 0))
+                  (cl-incf session-output (or (map-elt record 'output_tokens) 0))
+                  (cl-incf session-cost (or (map-elt record 'cost_amount) 0)))
+
+                ;; Add to all-sessions list
+                (push (list :session-id session-id
+                           :project project
+                           :input session-input
+                           :output session-output
+                           :cost session-cost
+                           :turns turn-count)
+                      all-sessions)))
+            by-session)))
+       by-project)
+
+      ;; Sort by project
+      (setq all-sessions (sort all-sessions
+                              (lambda (a b)
+                                (string< (plist-get a :project)
+                                        (plist-get b :project)))))
+
+      ;; Display table header
+      (setq output (concat output
+                          (format "%-10s %8s %8s %10s %6s  %s\n"
+                                 "Session" "In" "Out" "Cost" "Turns" "Project")
+                          (format "%s\n"
+                                 (make-string 70 ?-))))
+
+      ;; Display each session
+      (dolist (session all-sessions)
+        (setq output (concat output
+                            (format "%-10s %8s %8s %10s %6d  %s\n"
+                                   (agent-shell-usage-history--get-session-id-suffix
+                                    (plist-get session :session-id))
+                                   (agent-shell--format-number-compact
+                                    (plist-get session :input))
+                                   (agent-shell--format-number-compact
+                                    (plist-get session :output))
+                                   (format "$%.2f" (plist-get session :cost))
+                                   (plist-get session :turns)
+                                   (agent-shell-usage-history--abbreviate-project
+                                    (plist-get session :project))))))
+
+      (setq output (concat output "\n")))
     output))
 
 (defun agent-shell-usage-history--format-stats (stats period-name)
