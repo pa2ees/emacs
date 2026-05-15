@@ -143,20 +143,43 @@ Returns a list of usage records, each with timestamp and usage data."
       all-records)))
 
 (defun agent-shell-usage-history--append-to-week-file (record)
-  "Append a single RECORD to the appropriate weekly JSONL file."
+  "Append a single RECORD to the appropriate weekly JSONL file.
+Uses file locking and retries to handle concurrent writes safely."
   (condition-case err
       (let* ((timestamp (map-elt record 'timestamp))
              (time (when timestamp (date-to-time timestamp)))
-             (week-file (agent-shell-usage-history--get-week-file time)))
+             (week-file (agent-shell-usage-history--get-week-file time))
+             (max-retries 5)
+             (retry-delay 0.1)
+             (success nil))
         (agent-shell-usage-history--debug "Appending record to: %s" week-file)
         (unless (file-directory-p agent-shell-usage-history-directory)
           (agent-shell-usage-history--debug "Creating directory: %s" agent-shell-usage-history-directory)
           (make-directory agent-shell-usage-history-directory t))
-        (with-temp-buffer
-          (insert (json-encode record))
-          (insert "\n")
-          (write-region (point-min) (point-max) week-file t 'silent))
-        (agent-shell-usage-history--debug "Append complete"))
+
+        ;; Retry loop for handling concurrent access
+        (let ((attempt 0))
+          (while (and (not success) (< attempt max-retries))
+            (setq attempt (1+ attempt))
+            (condition-case write-err
+                (progn
+                  ;; Use write-region with append mode and let Emacs handle locking
+                  (with-temp-buffer
+                    (insert (json-encode record))
+                    (insert "\n")
+                    ;; write-region with APPEND=t and LOCKNAME=nil uses Emacs' file locking
+                    (let ((coding-system-for-write 'utf-8-unix))
+                      (write-region (point-min) (point-max) week-file t 'silent)))
+                  (setq success t)
+                  (agent-shell-usage-history--debug "Append complete on attempt %d" attempt))
+              (file-error
+               (agent-shell-usage-history--debug "Write failed on attempt %d: %S" attempt write-err)
+               (when (< attempt max-retries)
+                 (agent-shell-usage-history--debug "Retrying after %f seconds" retry-delay)
+                 (sleep-for retry-delay))))))
+
+        (unless success
+          (error "Failed to write after %d attempts" max-retries)))
     (error
      (agent-shell-usage-history--debug "Error appending to week file: %S" err)
      (message "Error saving usage history: %S" err))))
