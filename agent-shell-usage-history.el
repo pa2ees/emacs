@@ -54,6 +54,9 @@
 (defvar-local agent-shell-usage-history--project-root nil
   "Project root directory for this agent-shell session.")
 
+(defvar-local agent-shell-usage-history--last-cumulative-usage nil
+  "Last cumulative usage data from agent-shell, used to calculate per-turn deltas.")
+
 (defun agent-shell-usage-history--debug (format-string &rest args)
   "Log a debug message to the usage history debug buffer if debug is enabled."
   (when agent-shell-usage-history-debug
@@ -160,7 +163,8 @@ Uses file locking and retries to handle concurrent writes safely."
 
 (defun agent-shell-usage-history--record-usage (usage)
   "Record USAGE data to persistent history.
-USAGE should be an alist with token counts, context, and cost."
+USAGE should be an alist with token counts, context, and cost.
+Calculates per-turn deltas from cumulative usage data."
   (condition-case err
       (progn
         (agent-shell-usage-history--debug "record-usage called with: %S" usage)
@@ -169,22 +173,42 @@ USAGE should be an alist with token counts, context, and cost."
           (let ((total-tokens (or (map-elt usage :total-tokens) 0)))
             (if (<= total-tokens 0)
                 (agent-shell-usage-history--debug "Total tokens is %d, skipping record" total-tokens)
-              (let* ((timestamp (format-time-string "%Y-%m-%dT%H:%M:%S"))
+              ;; Calculate deltas only for cumulative fields (cost)
+              ;; Tokens appear to be per-turn already based on data inspection
+              (let* ((prev agent-shell-usage-history--last-cumulative-usage)
+                     (current-cost (or (map-elt usage :cost-amount) 0))
+                     (prev-cost (if prev (or (map-elt prev :cost-amount) 0) 0))
+                     (delta-cost (- current-cost prev-cost))
+                     ;; These appear to be per-turn already, use as-is
+                     (total-tokens (or (map-elt usage :total-tokens) 0))
+                     (input-tokens (or (map-elt usage :input-tokens) 0))
+                     (output-tokens (or (map-elt usage :output-tokens) 0))
+                     (thought-tokens (or (map-elt usage :thought-tokens) 0))
+                     (cached-read-tokens (or (map-elt usage :cached-read-tokens) 0))
+                     (cached-write-tokens (or (map-elt usage :cached-write-tokens) 0))
+                     (timestamp (format-time-string "%Y-%m-%dT%H:%M:%S"))
                      (record (list (cons 'timestamp timestamp)
                                   (cons 'session_id agent-shell-usage-history--session-id)
                                   (cons 'project_root agent-shell-usage-history--project-root)
-                                  (cons 'total_tokens (or (map-elt usage :total-tokens) 0))
-                                  (cons 'input_tokens (or (map-elt usage :input-tokens) 0))
-                                  (cons 'output_tokens (or (map-elt usage :output-tokens) 0))
-                                  (cons 'thought_tokens (or (map-elt usage :thought-tokens) 0))
-                                  (cons 'cached_read_tokens (or (map-elt usage :cached-read-tokens) 0))
-                                  (cons 'cached_write_tokens (or (map-elt usage :cached-write-tokens) 0))
+                                  (cons 'total_tokens total-tokens)
+                                  (cons 'input_tokens input-tokens)
+                                  (cons 'output_tokens output-tokens)
+                                  (cons 'thought_tokens thought-tokens)
+                                  (cons 'cached_read_tokens cached-read-tokens)
+                                  (cons 'cached_write_tokens cached-write-tokens)
                                   (cons 'context_used (or (map-elt usage :context-used) 0))
                                   (cons 'context_size (or (map-elt usage :context-size) 0))
-                                  (cons 'cost_amount (or (map-elt usage :cost-amount) 0))
+                                  (cons 'cost_amount delta-cost)
                                   (cons 'cost_currency (or (map-elt usage :cost-currency) "USD")))))
-                (agent-shell-usage-history--debug "Recording usage: tokens=%d timestamp=%s" total-tokens timestamp)
+                (agent-shell-usage-history--debug "Buffer: %s" (buffer-name))
+                (agent-shell-usage-history--debug "Prev object: %S" prev)
+                (agent-shell-usage-history--debug "Cost calculation: current=$%.2f prev=$%.2f delta=$%.2f"
+                                                 current-cost prev-cost delta-cost)
+                (agent-shell-usage-history--debug "Recording per-turn usage: tokens=%d cost=$%.2f timestamp=%s"
+                                                 total-tokens delta-cost timestamp)
                 (agent-shell-usage-history--append-to-week-file record)
+                ;; Save current cumulative for next delta calculation (make a copy!)
+                (setq agent-shell-usage-history--last-cumulative-usage (copy-tree usage))
                 (agent-shell-usage-history--debug "Usage recorded successfully"))))))
     (error
      (agent-shell-usage-history--debug "Error in record-usage: %S" err)
@@ -522,6 +546,19 @@ Should be called from agent-shell-mode-hook."
                 default-directory))
       (agent-shell-usage-history--debug "Captured project root: %s"
                                        agent-shell-usage-history--project-root))
+
+    ;; Initialize cumulative usage tracker to zeros at session start
+    (unless agent-shell-usage-history--last-cumulative-usage
+      (setq agent-shell-usage-history--last-cumulative-usage
+            (list (cons :total-tokens 0)
+                  (cons :input-tokens 0)
+                  (cons :output-tokens 0)
+                  (cons :thought-tokens 0)
+                  (cons :cached-read-tokens 0)
+                  (cons :cached-write-tokens 0)
+                  (cons :cost-amount 0)
+                  (cons :cost-currency "USD")))
+      (agent-shell-usage-history--debug "Initialized last cumulative usage to zeros"))
 
     ;; Subscribe to turn-complete events
     (setq agent-shell-usage-history--subscription-token
