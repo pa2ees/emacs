@@ -48,6 +48,12 @@
 (defvar agent-shell-usage-history-debug-buffer-name "*Agent Shell Usage History Debug*"
   "Name of the buffer for debug messages.")
 
+(defvar-local agent-shell-usage-history--session-id nil
+  "Unique session ID for this agent-shell buffer.")
+
+(defvar-local agent-shell-usage-history--project-root nil
+  "Project root directory for this agent-shell session.")
+
 (defun agent-shell-usage-history--debug (format-string &rest args)
   "Log a debug message to the usage history debug buffer if debug is enabled."
   (when agent-shell-usage-history-debug
@@ -165,6 +171,8 @@ USAGE should be an alist with token counts, context, and cost."
                 (agent-shell-usage-history--debug "Total tokens is %d, skipping record" total-tokens)
               (let* ((timestamp (format-time-string "%Y-%m-%dT%H:%M:%S"))
                      (record (list (cons 'timestamp timestamp)
+                                  (cons 'session_id agent-shell-usage-history--session-id)
+                                  (cons 'project_root agent-shell-usage-history--project-root)
                                   (cons 'total_tokens (or (map-elt usage :total-tokens) 0))
                                   (cons 'input_tokens (or (map-elt usage :input-tokens) 0))
                                   (cons 'output_tokens (or (map-elt usage :output-tokens) 0))
@@ -388,11 +396,34 @@ EVENT-DATA is an alist with :event and :data."
 (defvar-local agent-shell-usage-history--subscription-token nil
   "Subscription token for this buffer's turn-complete handler.")
 
+(defun agent-shell-usage-history--generate-session-id ()
+  "Generate a unique session ID."
+  (format "%s-%d-%04x"
+          (format-time-string "%Y%m%d-%H%M%S")
+          (emacs-pid)
+          (random 65536)))
+
 (defun agent-shell-usage-history--setup-subscription ()
-  "Set up subscription to turn-complete events.
+  "Set up subscription to turn-complete events and initialize session data.
 Should be called from agent-shell-mode-hook."
   (when (and (derived-mode-p 'agent-shell-mode)
              (not agent-shell-usage-history--subscription-token))
+    ;; Generate session ID and capture project root
+    (unless agent-shell-usage-history--session-id
+      (setq agent-shell-usage-history--session-id
+            (agent-shell-usage-history--generate-session-id))
+      (agent-shell-usage-history--debug "Generated session ID: %s"
+                                       agent-shell-usage-history--session-id))
+
+    (unless agent-shell-usage-history--project-root
+      (setq agent-shell-usage-history--project-root
+            (or (and (fboundp 'projectile-project-root)
+                     (projectile-project-root))
+                default-directory))
+      (agent-shell-usage-history--debug "Captured project root: %s"
+                                       agent-shell-usage-history--project-root))
+
+    ;; Subscribe to turn-complete events
     (setq agent-shell-usage-history--subscription-token
           (agent-shell-subscribe-to
            :shell-buffer (current-buffer)
