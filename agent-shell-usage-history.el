@@ -34,11 +34,21 @@
 (declare-function agent-shell--state "agent-shell")
 (declare-function agent-shell--format-number-compact "agent-shell-usage")
 
+(defcustom agent-shell-usage-history-directory
+  (expand-file-name "agent-shell-usage-history"
+                    (or (getenv "XDG_DATA_HOME")
+                        (expand-file-name ".local/share" "~")))
+  "Directory path for persistent usage history storage."
+  :type 'directory
+  :group 'agent-shell)
+
+;; Legacy variable for backwards compatibility
 (defcustom agent-shell-usage-history-file
   (expand-file-name "agent-shell-usage-history.json"
                     (or (getenv "XDG_DATA_HOME")
                         (expand-file-name ".local/share" "~")))
-  "File path for persistent usage history storage."
+  "Legacy file path for persistent usage history storage.
+This is kept for backwards compatibility with old data."
   :type 'file
   :group 'agent-shell)
 
@@ -60,11 +70,52 @@
       (insert (apply #'format format-string args))
       (insert "\n"))))
 
+(defun agent-shell-usage-history--get-week-string (&optional time)
+  "Get ISO week string (e.g., '2026-W20') for TIME (defaults to current time)."
+  (let* ((time (or time (current-time)))
+         (decoded (decode-time time))
+         (year (nth 5 decoded))
+         (week (string-to-number (format-time-string "%V" time))))
+    (format "%04d-W%02d" year week)))
+
+(defun agent-shell-usage-history--get-week-file (&optional time)
+  "Get the history file path for the week containing TIME (defaults to current time)."
+  (let ((week-string (agent-shell-usage-history--get-week-string time)))
+    (expand-file-name (format "usage-%s.jsonl" week-string)
+                      agent-shell-usage-history-directory)))
+
+(defun agent-shell-usage-history--load-week-file (file)
+  "Load usage history from a single JSONL FILE.
+Returns a list of usage records."
+  (if (file-exists-p file)
+      (condition-case err
+          (with-temp-buffer
+            (insert-file-contents file)
+            (let ((json-object-type 'alist)
+                  (json-key-type 'symbol)
+                  (records '()))
+              (goto-char (point-min))
+              (while (not (eobp))
+                (unless (looking-at-p "^[[:space:]]*$")
+                  (let ((line (buffer-substring-no-properties
+                              (line-beginning-position)
+                              (line-end-position))))
+                    (when (> (length line) 0)
+                      (push (json-read-from-string line) records))))
+                (forward-line 1))
+              (nreverse records)))
+        (error
+         (agent-shell-usage-history--debug "Error loading file %s: %s" file err)
+         nil))
+    nil))
+
 (defun agent-shell-usage-history--load-history ()
   "Load usage history from disk.
 Returns a list of usage records, each with timestamp and usage data."
-  (agent-shell-usage-history--debug "Loading history from: %s" agent-shell-usage-history-file)
-  (if (file-exists-p agent-shell-usage-history-file)
+  ;; First try to load from legacy file
+  (let ((legacy-history nil))
+    (when (file-exists-p agent-shell-usage-history-file)
+      (agent-shell-usage-history--debug "Loading legacy history from: %s" agent-shell-usage-history-file)
       (condition-case err
           (with-temp-buffer
             (insert-file-contents agent-shell-usage-history-file)
@@ -75,17 +126,44 @@ Returns a list of usage records, each with timestamp and usage data."
               ;; Ensure history is a list, not a vector
               (when (vectorp history)
                 (setq history (append history nil)))
-              (agent-shell-usage-history--debug "Loaded %d records from history" (length history))
-              history))
+              (setq legacy-history history)
+              (agent-shell-usage-history--debug "Loaded %d records from legacy file" (length history))))
         (error
-         (agent-shell-usage-history--debug "Error loading history: %s" err)
-         (message "Error loading usage history: %s" err)
-         nil))
-    (agent-shell-usage-history--debug "History file does not exist yet")
-    nil))
+         (agent-shell-usage-history--debug "Error loading legacy history: %s" err))))
 
+    ;; Load from new weekly files
+    (let ((week-files (when (file-directory-p agent-shell-usage-history-directory)
+                        (directory-files agent-shell-usage-history-directory t "^usage-.*\\.jsonl$")))
+          (all-records legacy-history))
+      (dolist (file week-files)
+        (agent-shell-usage-history--debug "Loading week file: %s" file)
+        (let ((records (agent-shell-usage-history--load-week-file file)))
+          (setq all-records (append all-records records))))
+      (agent-shell-usage-history--debug "Loaded %d total records" (length all-records))
+      all-records)))
+
+(defun agent-shell-usage-history--append-to-week-file (record)
+  "Append a single RECORD to the appropriate weekly JSONL file."
+  (condition-case err
+      (let* ((timestamp (map-elt record 'timestamp))
+             (time (when timestamp (date-to-time timestamp)))
+             (week-file (agent-shell-usage-history--get-week-file time)))
+        (agent-shell-usage-history--debug "Appending record to: %s" week-file)
+        (unless (file-directory-p agent-shell-usage-history-directory)
+          (agent-shell-usage-history--debug "Creating directory: %s" agent-shell-usage-history-directory)
+          (make-directory agent-shell-usage-history-directory t))
+        (with-temp-buffer
+          (insert (json-encode record))
+          (insert "\n")
+          (write-region (point-min) (point-max) week-file t 'silent))
+        (agent-shell-usage-history--debug "Append complete"))
+    (error
+     (agent-shell-usage-history--debug "Error appending to week file: %S" err)
+     (message "Error saving usage history: %S" err))))
+
+;; Keep old function for backwards compatibility (used by export/clear functions)
 (defun agent-shell-usage-history--save-history (history)
-  "Save usage HISTORY to disk."
+  "Save usage HISTORY to disk (legacy function, kept for compatibility)."
   (condition-case err
       (progn
         (agent-shell-usage-history--debug "Saving %d records to: %s" (length history) agent-shell-usage-history-file)
@@ -112,8 +190,7 @@ USAGE should be an alist with token counts, context, and cost."
           (let ((total-tokens (or (map-elt usage :total-tokens) 0)))
             (if (<= total-tokens 0)
                 (agent-shell-usage-history--debug "Total tokens is %d, skipping record" total-tokens)
-              (let* ((history (or (agent-shell-usage-history--load-history) '()))
-                     (timestamp (format-time-string "%Y-%m-%dT%H:%M:%S"))
+              (let* ((timestamp (format-time-string "%Y-%m-%dT%H:%M:%S"))
                      (record (list (cons 'timestamp timestamp)
                                   (cons 'total_tokens (or (map-elt usage :total-tokens) 0))
                                   (cons 'input_tokens (or (map-elt usage :input-tokens) 0))
@@ -126,8 +203,7 @@ USAGE should be an alist with token counts, context, and cost."
                                   (cons 'cost_amount (or (map-elt usage :cost-amount) 0))
                                   (cons 'cost_currency (or (map-elt usage :cost-currency) "USD")))))
                 (agent-shell-usage-history--debug "Recording usage: tokens=%d timestamp=%s" total-tokens timestamp)
-                (push record history)
-                (agent-shell-usage-history--save-history history)
+                (agent-shell-usage-history--append-to-week-file record)
                 (agent-shell-usage-history--debug "Usage recorded successfully"))))))
     (error
      (agent-shell-usage-history--debug "Error in record-usage: %S" err)
