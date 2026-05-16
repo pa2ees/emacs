@@ -410,19 +410,36 @@ PERIOD can be 'day, 'week, or 'month."
                           (format "%s\n"
                                  (make-string 70 ?-))))
 
-      ;; Display each session
-      (dolist (session all-sessions)
+      ;; Display each session and calculate totals
+      (let ((total-tokens 0)
+            (total-cost 0.0)
+            (total-turns 0))
+        (dolist (session all-sessions)
+          (let ((tokens (+ (plist-get session :input)
+                          (plist-get session :output)))
+                (cost (plist-get session :cost))
+                (turns (plist-get session :turns)))
+            (cl-incf total-tokens tokens)
+            (cl-incf total-cost cost)
+            (cl-incf total-turns turns)
+            (setq output (concat output
+                                (format "%-10s %10s %10s %6d  %s\n"
+                                       (agent-shell-usage-history--get-session-id-suffix
+                                        (plist-get session :session-id))
+                                       (agent-shell--format-number-compact tokens)
+                                       (format "$%.2f" cost)
+                                       turns
+                                       (agent-shell-usage-history--abbreviate-project
+                                        (plist-get session :project)))))))
+
+        ;; Add total row
         (setq output (concat output
-                            (format "%-10s %10s %10s %6d  %s\n"
-                                   (agent-shell-usage-history--get-session-id-suffix
-                                    (plist-get session :session-id))
-                                   (agent-shell--format-number-compact
-                                    (+ (plist-get session :input)
-                                       (plist-get session :output)))
-                                   (format "$%.2f" (plist-get session :cost))
-                                   (plist-get session :turns)
-                                   (agent-shell-usage-history--abbreviate-project
-                                    (plist-get session :project))))))
+                            (format "%s\n" (make-string 70 ?-))
+                            (format "%-10s %10s %10s %6d\n"
+                                   "TOTAL"
+                                   (agent-shell--format-number-compact total-tokens)
+                                   (format "$%.2f" total-cost)
+                                   total-turns))))
 
       (setq output (concat output "\n")))
     output))
@@ -460,8 +477,7 @@ PERIOD can be 'day, 'week, or 'month."
 (defun agent-shell-usage-history-show-all ()
   "Show usage statistics for all time periods in a dedicated buffer."
   (interactive)
-  (let ((daily (agent-shell-usage-history--get-period-stats 'day))
-        (weekly (agent-shell-usage-history--get-period-stats 'week))
+  (let ((weekly (agent-shell-usage-history--get-period-stats 'week))
         (monthly (agent-shell-usage-history--get-period-stats 'month))
         (buf (get-buffer-create "*Agent Shell Usage History*")))
     (with-current-buffer buf
@@ -473,9 +489,6 @@ PERIOD can be 'day, 'week, or 'month."
         (insert (agent-shell-usage-history--format-today-sessions))
         (insert "\n")
         ;; Period summaries
-        (insert (propertize "=== Last 24 Hours ===\n" 'face 'bold))
-        (insert (agent-shell-usage-history--format-stats daily "Last 24 Hours"))
-        (insert "\n\n")
         (insert (propertize "=== Last 7 Days ===\n" 'face 'bold))
         (insert (agent-shell-usage-history--format-stats weekly "Last 7 Days"))
         (insert "\n\n")

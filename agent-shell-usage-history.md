@@ -33,20 +33,20 @@ Cost: $7.11
 ```
 
 ### Today's Sessions
-Table view of all sessions from today, grouped and sorted by project:
+Table view of all sessions from today, grouped and sorted by project, with totals:
 ```
 === Today (2026-05-15) ===
 Session         Tokens       Cost  Turns  Project
 ----------------------------------------------------------------------
 91ed              792K      $7.11      1  ~/projects/emacs/
+a3f2              456K      $3.89      3  ~/projects/myapp/
+----------------------------------------------------------------------
+TOTAL            1.2M       $11.00     4
 ```
 
 ### Period Summaries
 Aggregated statistics with unique session counting:
 ```
-=== Last 24 Hours ===
-Sessions: 1 | Total: 792K | Cost: $7.11
-
 === Last 7 Days ===
 Sessions: 5 | Total: 2.1M | Cost: $15.43
 
