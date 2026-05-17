@@ -17,7 +17,10 @@
          ("C-c a r" . evz/agent-shell-helpers-restart-all)
          ("C-c a l" . evz/aws-sso-login)
          ("C-c a d" . evz/agent-shell-bridge-toggle-debug))
-  :hook (agent-shell-mode . evz/agent-shell-setup-cleanup-hook)
+  :hook ((agent-shell-mode . evz/agent-shell-setup-cleanup-hook)
+         (agent-shell-mode . (lambda ()
+                               (setq truncate-lines nil
+                                     word-wrap t))))
   :config
   (setq agent-shell-anthropic-claude-acp-command
         '("~/.config/claude/claude-acp-engine.sh")))
