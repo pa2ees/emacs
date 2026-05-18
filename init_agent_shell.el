@@ -30,6 +30,17 @@
   :defer t)
 
 ;; ============================================================================
+;; Context Injection System
+;; ============================================================================
+(load-file (concat user-emacs-init-directory "agent-shell-context-inject.el"))
+(require 'agent-shell-context-inject)
+
+;; Add keybinding in agent-shell buffers
+(with-eval-after-load 'agent-shell
+  (define-key agent-shell-mode-map (kbd "C-c a C")
+              #'evz/agent-shell-inject-context))
+
+;; ============================================================================
 ;; Usage History Tracking
 ;; ============================================================================
 (load-file (concat user-emacs-init-directory "agent-shell-usage-history.el"))
