@@ -8,7 +8,7 @@
   :ensure t
   :bind (("C-c a a" . evz/agent-shell-switch)
          ("C-c a c" . evz/agent-shell-with-context)
-         ("C-c a u" . agent-shell-show-usage)
+         ("C-c a u" . agent-shell-usage-history-show-all)
          ("C-c a i" . evz/agent-shell-helpers-show-status)
          ("C-c a s" . evz/emacs-mcp-server-start)
          ("C-c a S" . evz/emacs-mcp-server-stop)
