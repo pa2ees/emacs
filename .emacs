@@ -98,36 +98,37 @@
   :ensure t)
 
 ;; ************* TREE-SITTER STUFF *****************
+;; DISABLED: Interferes with lsp-mode integration
 ;; Configure grammar sources with ABI 14 compatible versions
 ;; (Emacs 30.2 with Ubuntu's libtree-sitter 0.20.3 uses ABI 14)
-(setq treesit-language-source-alist
-      '((bash "https://github.com/tree-sitter/tree-sitter-bash" "v0.21.0")
-        (c "https://github.com/tree-sitter/tree-sitter-c" "v0.21.3")
-        (cpp "https://github.com/tree-sitter/tree-sitter-cpp" "v0.22.0")
-        (cmake "https://github.com/uyha/tree-sitter-cmake" "v0.5.0")
-        (css "https://github.com/tree-sitter/tree-sitter-css" "v0.21.0")
-        (elisp "https://github.com/Wilfred/tree-sitter-elisp" "v1.3.0")
-        (html "https://github.com/tree-sitter/tree-sitter-html" "v0.20.3")
-        (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "v0.21.2")
-        (json "https://github.com/tree-sitter/tree-sitter-json" "v0.21.0")
-        (markdown "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "v0.2.3")
-        (python "https://github.com/tree-sitter/tree-sitter-python" "v0.21.0")
-        (toml "https://github.com/tree-sitter-grammars/tree-sitter-toml" "v0.6.0")
-        (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "v0.21.1" "typescript/src")
-        (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "v0.21.1" "tsx/src")
-        (yaml "https://github.com/tree-sitter-grammars/tree-sitter-yaml" "v0.6.1")))
+;; (setq treesit-language-source-alist
+;;       '((bash "https://github.com/tree-sitter/tree-sitter-bash" "v0.21.0")
+;;         (c "https://github.com/tree-sitter/tree-sitter-c" "v0.21.3")
+;;         (cpp "https://github.com/tree-sitter/tree-sitter-cpp" "v0.22.0")
+;;         (cmake "https://github.com/uyha/tree-sitter-cmake" "v0.5.0")
+;;         (css "https://github.com/tree-sitter/tree-sitter-css" "v0.21.0")
+;;         (elisp "https://github.com/Wilfred/tree-sitter-elisp" "v1.3.0")
+;;         (html "https://github.com/tree-sitter/tree-sitter-html" "v0.20.3")
+;;         (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "v0.21.2")
+;;         (json "https://github.com/tree-sitter/tree-sitter-json" "v0.21.0")
+;;         (markdown "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "v0.2.3")
+;;         (python "https://github.com/tree-sitter/tree-sitter-python" "v0.21.0")
+;;         (toml "https://github.com/tree-sitter-grammars/tree-sitter-toml" "v0.6.0")
+;;         (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "v0.21.1" "typescript/src")
+;;         (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "v0.21.1" "tsx/src")
+;;         (yaml "https://github.com/tree-sitter-grammars/tree-sitter-yaml" "v0.6.1")))
 
 ;; Prompt before installing grammars
-(setq treesit-auto-install 'prompt)
+;; (setq treesit-auto-install 'prompt)
 
 ;; treesit-auto: automatically switches to tree-sitter modes
-(use-package treesit-auto
-  :ensure t
-  :config
-  (global-treesit-auto-mode)
+;; (use-package treesit-auto
+;;   :ensure t
+;;   :config
+;;   (global-treesit-auto-mode)
 
-  ;; Hook copying is done later in init file after modes are loaded
-  )
+;;   ;; Hook copying is done later in init file after modes are loaded
+;;   )
 
 (use-package neotree
   :ensure t)
@@ -399,17 +400,17 @@
 ;; ************* TREE-SITTER HOOK SETUP ************
 ;; Copy hooks from traditional modes to tree-sitter modes
 ;; Done at end of init to ensure all modes are loaded first
-(when (boundp 'c-mode-common-hook)
-  (setq c-ts-mode-hook c-mode-common-hook)
-  (setq c++-ts-mode-hook c-mode-common-hook))
-(when (boundp 'python-mode-hook)
-  (setq python-ts-mode-hook python-mode-hook))
-(when (boundp 'sh-mode-hook)
-  (setq bash-ts-mode-hook sh-mode-hook))
-(when (boundp 'org-mode-hook)
-  (setq org-ts-mode-hook org-mode-hook))
-(when (boundp 'verilog-mode-hook)
-  (setq verilog-ts-mode-hook verilog-mode-hook))
+;; (when (boundp 'c-mode-common-hook)
+;;   (setq c-ts-mode-hook c-mode-common-hook)
+;;   (setq c++-ts-mode-hook c-mode-common-hook))
+;; (when (boundp 'python-mode-hook)
+;;   (setq python-ts-mode-hook python-mode-hook))
+;; (when (boundp 'sh-mode-hook)
+;;   (setq bash-ts-mode-hook sh-mode-hook))
+;; (when (boundp 'org-mode-hook)
+;;   (setq org-ts-mode-hook org-mode-hook))
+;; (when (boundp 'verilog-mode-hook)
+;;   (setq verilog-ts-mode-hook verilog-mode-hook))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
