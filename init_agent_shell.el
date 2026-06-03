@@ -488,5 +488,27 @@
     (message "MCP Server: %s | Bridge: %s | In Project: %s"
              mcp-status bridge-status project-status)))
 
+;; ============================================================================
+;; Banner Customization
+;; ============================================================================
+
+(defun evz/abbreviate-arn (arn)
+  "Abbreviate an ARN to show only service and region.
+For example: arn:aws-us-gov:bedrock:us-gov-west-1:... becomes bedrock:us-gov-west-1"
+  (if (and arn (string-match "^arn:[^:]+:\\([^:]+\\):\\([^:]+\\):" arn))
+      (format "%s:%s" (match-string 1 arn) (match-string 2 arn))
+    arn))
+
+(defun evz/agent-shell-get-model-name-abbreviated (orig-fun state)
+  "Advice to abbreviate ARNs in model names."
+  (let ((model-name (funcall orig-fun state)))
+    (if model-name
+        (evz/abbreviate-arn model-name)
+      model-name)))
+
+;; Apply the advice to abbreviate long ARNs in the banner
+(with-eval-after-load 'agent-shell
+  (advice-add 'agent-shell-get-model-name :around #'evz/agent-shell-get-model-name-abbreviated))
+
 (provide 'init-agent-shell)
 ;;; init_agent_shell.el ends here
