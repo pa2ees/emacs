@@ -24,7 +24,20 @@
          (agent-shell-viewport-edit-mode . auto-fill-mode))
   :config
   (setq agent-shell-anthropic-claude-acp-command
-        '("~/.config/claude/claude-acp-engine.sh")))
+        '("~/.config/claude/claude-acp-engine.sh"))
+
+  ;; Configure MCP servers (non-bridge servers)
+  (setq agent-shell-mcp-servers
+        '(((name . "confluence")
+           (command . "npx")
+           (args . ["-y" "@atlassian-dc-mcp/confluence"])
+           (env . [((name . "NODE_EXTRA_CA_CERTS")
+                    (value . "/etc/ssl/certs/imsarCAnew.pem"))]))
+          ((name . "jira")
+           (command . "npx")
+           (args . ["-y" "@atlassian-dc-mcp/jira"])
+           (env . [((name . "NODE_EXTRA_CA_CERTS")
+                    (value . "/etc/ssl/certs/imsarCAnew.pem"))])))))
 
 (use-package emacs-mcp-server
   :vc (:url "https://github.com/rhblind/emacs-mcp-server")
@@ -339,22 +352,15 @@
   ;; Store the URL for agent-shell configuration
   (setq evz/agent-shell-bridge-url (format "http://127.0.0.1:%d" evz/agent-shell-bridge-port))
 
-  ;; Configure agent-shell to use this bridge
+  ;; Remove any existing emacs entry and add the new one
   (setq agent-shell-mcp-servers
-        `(((name . "emacs")
-           (type . "http")
-           (url . ,evz/agent-shell-bridge-url)
-           (headers . []))
-          ((name . "confluence")
-           (command . "npx")
-           (args . ["-y" "@atlassian-dc-mcp/confluence"])
-           (env . [((name . "NODE_EXTRA_CA_CERTS")
-                    (value . "/etc/ssl/certs/imsarCAnew.pem"))]))
-          ((name . "jira")
-           (command . "npx")
-           (args . ["-y" "@atlassian-dc-mcp/jira"])
-           (env . [((name . "NODE_EXTRA_CA_CERTS")
-                    (value . "/etc/ssl/certs/imsarCAnew.pem"))]))))
+        (cons `((name . "emacs")
+                (type . "http")
+                (url . ,evz/agent-shell-bridge-url)
+                (headers . []))
+              (seq-remove (lambda (server)
+                            (string= (alist-get 'name server) "emacs"))
+                          agent-shell-mcp-servers)))
 
   (evz/agent-shell-bridge--log "🚀 MCP HTTP bridge listening on http://127.0.0.1:%d" evz/agent-shell-bridge-port)
   (evz/agent-shell-bridge--log "🔌 forwarding to unix socket: %s" evz/agent-shell-bridge-sock-path)
