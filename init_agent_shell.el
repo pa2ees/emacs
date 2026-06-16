@@ -20,7 +20,8 @@
   :hook ((agent-shell-mode . evz/agent-shell-setup-cleanup-hook)
          (agent-shell-mode . (lambda ()
                                (setq truncate-lines nil
-                                     word-wrap t))))
+                                     word-wrap t)))
+         (agent-shell-viewport-edit-mode . auto-fill-mode))
   :config
   (setq agent-shell-anthropic-claude-acp-command
         '("~/.config/claude/claude-acp-engine.sh")))
