@@ -28,7 +28,11 @@
 
   ;; Configure MCP servers (non-bridge servers)
   (setq agent-shell-mcp-servers
-        '(((name . "confluence")
+        '(((name . "kb")
+           (command . "/home/erik/.virtualenvs/claude-mcp/bin/python3")
+           (args . ["/home/erik/projects/claude-kb/claude-kb-mcp.py"])
+           (env . []))
+          ((name . "confluence")
            (command . "npx")
            (args . ["-y" "@atlassian-dc-mcp/confluence"])
            (env . [((name . "NODE_EXTRA_CA_CERTS")
