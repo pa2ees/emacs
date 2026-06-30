@@ -361,6 +361,7 @@
 ;; (evz/compile-maybe-and-load (concat user-emacs-init-directory "init_magit"))
 (load-file (concat user-emacs-init-directory "init_magit.el"))
 (global-set-key (kbd "C-x g") 'evz/helm-select-project-magit)
+(global-set-key (kbd "C-x C-g") 'evz/helm-select-magit-buffer)
 (setenv "GIT_ASKPASS" "git-gui--askpass")
 (setenv "SSH_ASKPASS" "git-gui--askpass")
 

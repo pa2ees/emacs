@@ -52,3 +52,30 @@
   (let ((working-project-dir (or (evz/helm-select-project "Select Project for Magit") default-directory)))
     (magit-status working-project-dir)))
 
+(defun evz/helm-select-magit-buffer ()
+  "Select from open magit-status buffers and display in current window."
+  (interactive)
+  (let* ((magit-buffers (seq-filter
+                         (lambda (buf)
+                           (with-current-buffer buf
+                             (eq major-mode 'magit-status-mode)))
+                         (buffer-list)))
+         (candidates (mapcar (lambda (buf)
+                               (cons (format "%-30s  %s"
+                                             (buffer-name buf)
+                                             (with-current-buffer buf default-directory))
+                                     buf))
+                             magit-buffers)))
+    (cond
+     ((null candidates)
+      (message "No magit-status buffers found"))
+     ((= (length candidates) 1)
+      (switch-to-buffer (cdar candidates)))
+     (t
+      (let ((selected (helm :sources (helm-build-sync-source "Select Magit Buffer"
+                                       :candidates candidates
+                                       :action #'identity)
+                            :buffer "*helm magit buffers*")))
+        (when selected
+          (switch-to-buffer selected)))))))
+
